@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
@@ -43,6 +44,14 @@ var (
 func run() error {
 	ctx := context.Background()
 
+	err := login(ctx, email, password)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func login(ctx context.Context, email string, password []byte) error {
 	var preLogin preLoginResponse
 	if err := jsonPOST(ctx, apiURL+"/accounts/prelogin", &preLogin, preLoginRequest{
 		Email: email,
@@ -67,21 +76,40 @@ func run() error {
 
 	// Now, we request an auth token.
 	// For some reason, this endpoint requires url-encoded values, and won't
-	// accept JSON.
-	tokLoginReq := make(url.Values)
-	tokLoginReq.Set("grant_type", "password")
-	tokLoginReq.Set("username", email)
-	tokLoginReq.Set("password", string(hashedPassword))
-	tokLoginReq.Set("scope", loginScope)
-	tokLoginReq.Set("client_id", "connector") // seen in bitwarden/jslib
-	tokLoginReq.Set("deviceType", deviceType)
-	tokLoginReq.Set("deviceIdentifier", deviceID)
-	tokLoginReq.Set("deviceName", deviceName)
-	tokLogin := make(url.Values)
-	if err := queryPOST(ctx, idtURL+"/connect/token", tokLogin, tokLoginReq); err != nil {
+	// accept JSON. But of course, the response is JSON.
+	var tokLogin tokLoginResponse
+	err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, urlValues(
+		"grant_type", "password",
+		"username", email,
+		"password", string(hashedPassword),
+		"scope", loginScope,
+		"client_id", "connector", // seen in bitwarden/jslib
+		"deviceType", deviceType,
+		"deviceIdentifier", deviceID,
+		"deviceName", deviceName,
+	))
+	errsc, ok := err.(*errStatusCode)
+	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
+		return fmt.Errorf("TODO: tfa")
+	}
+	if err != nil {
 		return fmt.Errorf("could not login via password: %v", err)
 	}
+	fmt.Printf("%#v\n", tokLogin)
 	return nil
+}
+
+type urlencoded strings.Reader
+
+func urlValues(pairs ...string) url.Values {
+	if len(pairs)%2 != 0 {
+		panic("pairs must be of even length")
+	}
+	vals := make(url.Values)
+	for i := 0; i < len(pairs); i += 2 {
+		vals.Set(pairs[i], pairs[i+1])
+	}
+	return vals
 }
 
 var base64Encoding = base64.StdEncoding.Strict()
