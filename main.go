@@ -4,126 +4,178 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/base64"
+	"encoding/json"
+	"flag"
 	"fmt"
-	"net/url"
+	"io/ioutil"
 	"os"
-	"strings"
+	"path/filepath"
+	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/crypto/pbkdf2"
+	"github.com/knq/ini"
 )
 
-func main() {
-	if err := run(); err != nil {
-		fmt.Fprintln(os.Stderr, "error:", err)
-		os.Exit(1)
+var flagSet = flag.NewFlagSet("bitw", flag.ContinueOnError)
+
+func init() { flagSet.Usage = usage }
+
+func usage() {
+	fmt.Fprintf(os.Stderr, `
+Usage of bitw:
+
+	benchinit [flags] [command]
+
+Commands:
+
+	sync    fetch the latest data from the server
+`[1:])
+	flagSet.PrintDefaults()
+}
+
+func main() { os.Exit(main1()) }
+
+func main1() int {
+	if err := flagSet.Parse(os.Args[1:]); err != nil {
+		if err != flag.ErrHelp {
+			fmt.Fprintf(os.Stderr, "flag: %v\n", err)
+			flagSet.Usage()
+		}
+		return 2
 	}
+	args := flagSet.Args()
+	if len(args) == 0 {
+		flagSet.Usage()
+		return 2
+	}
+	if err := run(args...); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		return 1
+	}
+	return 0
 }
 
 const (
 	deviceName = "firefox"
 	deviceType = "3" // bitwarden's device type for FireFox
 	loginScope = "api offline_access"
+
+	// TODO: replace this with websocket push syncing; see
+	// https://blog.bitwarden.com/live-sync-bitwarden-apps-fb7a54569fea
+	syncInterval = 5 * time.Minute
 )
 
-// TODO: move these to a config file
+// These can be overriden by the config.
 var (
-	deviceID = uuid.New().String() // TODO: make this constant
-	apiURL   = "https://api.bitwarden.com"
-	idtURL   = "https://identity.bitwarden.com"
+	apiURL = "https://api.bitwarden.com"
+	idtURL = "https://identity.bitwarden.com"
 
-	email    = os.Getenv("EMAIL")
-	password = []byte(os.Getenv("PASSWORD"))
+	email = os.Getenv("EMAIL")
 )
 
-func run() error {
-	ctx := context.Background()
+var (
+	config *ini.File
+	data   dataFile
 
-	err := login(ctx, email, password)
-	if err != nil {
+	saveData bool
+)
+
+type dataFile struct {
+	path string
+
+	DeviceID     string
+	AccessToken  string
+	RefreshToken string
+	TokenExpiry  time.Time
+
+	LastSync time.Time
+	Sync     SyncData
+}
+
+func loadDataFile(path string) error {
+	data.path = path
+	f, err := os.Open(path)
+	if os.IsNotExist(err) {
+		return nil
+	} else if err != nil {
+		return err
+	}
+	defer f.Close()
+	if err := json.NewDecoder(f).Decode(&data); err != nil {
 		return err
 	}
 	return nil
 }
 
-func login(ctx context.Context, email string, password []byte) error {
-	var preLogin preLoginResponse
-	if err := jsonPOST(ctx, apiURL+"/accounts/prelogin", &preLogin, preLoginRequest{
-		Email: email,
-	}); err != nil {
-		return fmt.Errorf("could not pre-login: %v", err)
-	}
-
-	// First, we create the master key, with the password, the lowercase
-	// email as salt, and the number of iterations the server told us.
-	masterKey := pbkdf2.Key(password, []byte(strings.ToLower(email)),
-		preLogin.KDFIterations, 32, sha256.New)
-
-	// symmetricKey := randBytes(64)
-	// encKey := symmetricKey[:32]
-	// macKey := symmetricKey[32:]
-	// iv := randBytes(16)
-
-	// Then we create the hashed password, with the master key as password,
-	// the password as hash, and just one iteration.
-	hashedPassword := b64enc(pbkdf2.Key(masterKey, password,
-		1, 32, sha256.New))
-
-	// Now, we request an auth token.
-	// For some reason, this endpoint requires url-encoded values, and won't
-	// accept JSON. But of course, the response is JSON.
-	var tokLogin tokLoginResponse
-	err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, urlValues(
-		"grant_type", "password",
-		"username", email,
-		"password", string(hashedPassword),
-		"scope", loginScope,
-		"client_id", "connector", // seen in bitwarden/jslib
-		"deviceType", deviceType,
-		"deviceIdentifier", deviceID,
-		"deviceName", deviceName,
-	))
-	errsc, ok := err.(*errStatusCode)
-	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
-		return fmt.Errorf("TODO: tfa")
-	}
+func (f *dataFile) Save() error {
+	bs, err := json.MarshalIndent(f, "", "\t")
 	if err != nil {
-		return fmt.Errorf("could not login via password: %v", err)
+		return err
 	}
-	fmt.Printf("%#v\n", tokLogin)
+	bs = append(bs, '\n')
+	if err := os.MkdirAll(filepath.Dir(f.path), 0755); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(f.path, bs, 0600)
+}
+
+func run(args ...string) (err error) {
+	dir, err := userConfigDir()
+	if err != nil {
+		return err
+	}
+	dir = filepath.Join(dir, "bitw")
+	config, err = ini.LoadFile(filepath.Join(dir, "config"))
+	if err != nil {
+		return err
+	}
+	if err := loadDataFile(filepath.Join(dir, "data.json")); err != nil {
+		return err
+	}
+	defer func() {
+		if !saveData {
+			return
+		}
+		if err1 := data.Save(); err == nil {
+			err = err1
+		}
+	}()
+
+	if e := config.GetKey("email"); e != "" {
+		email = e
+	}
+	if u := config.GetKey("apiURL"); u != "" {
+		apiURL = u
+	}
+	if u := config.GetKey("identityURL"); u != "" {
+		idtURL = u
+	}
+
+	if data.DeviceID == "" {
+		data.DeviceID = uuid.New().String()
+		saveData = true
+	}
+
+	ctx := context.Background()
+	if data.RefreshToken == "" {
+		if err := login(ctx); err != nil {
+			return err
+		}
+	} else if time.Now().After(data.TokenExpiry) {
+		if err := refreshToken(ctx); err != nil {
+			return err
+		}
+	}
+
+	ctx = context.WithValue(ctx, authToken{}, data.AccessToken)
+	switch args[0] {
+	case "sync":
+		if err := sync(ctx); err != nil {
+			return err
+		}
+	default:
+		flagSet.Usage()
+	}
 	return nil
-}
-
-type urlencoded strings.Reader
-
-func urlValues(pairs ...string) url.Values {
-	if len(pairs)%2 != 0 {
-		panic("pairs must be of even length")
-	}
-	vals := make(url.Values)
-	for i := 0; i < len(pairs); i += 2 {
-		vals.Set(pairs[i], pairs[i+1])
-	}
-	return vals
-}
-
-var base64Encoding = base64.StdEncoding.Strict()
-
-func b64enc(src []byte) []byte {
-	dst := make([]byte, base64Encoding.EncodedLen(len(src)))
-	base64Encoding.Encode(dst, src)
-	return dst
-}
-
-func randBytes(size int) []byte {
-	p := make([]byte, size)
-	if _, err := rand.Read(p); err != nil {
-		panic(err)
-	}
-	return p
 }

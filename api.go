@@ -12,32 +12,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
 
-// no need for a timeout, as we use contexts.
-var httpClient = &http.Client{}
-
-type preLoginRequest struct {
-	Email string `json:"email"`
-}
-
-type preLoginResponse struct {
-	KDF           int
-	KDFIterations int
-}
-
-type tokLoginResponse struct {
-	AccessToken  string `json:"access_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-	Key          string `json:"key"`
-}
-
-type twoFactorResponse struct {
-	TwoFactorProviders []int
+var httpClient = &http.Client{
+	// Specific http calls can use lower timeouts via context.
+	Timeout: 10 * time.Second,
 }
 
 type errStatusCode struct {
@@ -48,6 +30,8 @@ type errStatusCode struct {
 func (e *errStatusCode) Error() string {
 	return fmt.Sprintf("%s: %s", http.StatusText(e.code), e.body)
 }
+
+type authToken struct{}
 
 func jsonPOST(ctx context.Context, urlstr string, recv, send interface{}) error {
 	var r io.Reader
@@ -68,12 +52,20 @@ func jsonPOST(ctx context.Context, urlstr string, recv, send interface{}) error 
 		return err
 	}
 	req.Header.Set("Content-Type", contentType)
+	return httpDo(ctx, req, recv)
+}
 
-	if req.Context() == nil {
-		// Set a default timeout.
-		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		defer cancel()
-		req = req.WithContext(ctx)
+func jsonGET(ctx context.Context, urlstr string, recv interface{}) error {
+	req, err := http.NewRequest("GET", urlstr, nil)
+	if err != nil {
+		return err
+	}
+	return httpDo(ctx, req, recv)
+}
+
+func httpDo(ctx context.Context, req *http.Request, recv interface{}) error {
+	if token, ok := ctx.Value(authToken{}).(string); ok {
+		req.Header.Set("Authorization", "Bearer "+token)
 	}
 
 	res, err := httpClient.Do(req)
@@ -85,11 +77,12 @@ func jsonPOST(ctx context.Context, urlstr string, recv, send interface{}) error 
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(body, recv); err != nil {
-		return err
-	}
 	if res.StatusCode != 200 {
 		return &errStatusCode{res.StatusCode, body}
+	}
+	if err := json.Unmarshal(body, recv); err != nil {
+		fmt.Fprintln(os.Stderr, string(body))
+		return err
 	}
 	return nil
 }
