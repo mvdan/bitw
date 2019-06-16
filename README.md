@@ -2,9 +2,13 @@
 
 A simple BitWarden client.
 
+	cd $(mktemp -d); go mod init tmp; go get mvdan.cc/bitw
+
 The goal is a static and portable client which integrates well with one's
 system. For example, on Linux it will implement the `org.freedesktop.secrets`
 D-Bus service.
+
+Note that this tool is still a work in progress.
 
 #### Further reading
 
