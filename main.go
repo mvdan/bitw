@@ -35,11 +35,14 @@ func usage() {
 	fmt.Fprintf(os.Stderr, `
 Usage of bitw:
 
-	benchinit [flags] [command]
+	bitw [command]
 
 Commands:
 
+	help    show a command's help text
 	sync    fetch the latest data from the server
+	dump    list all the stored login secrets
+	login   force a new login, even if not necessary
 `[1:])
 	flagSet.PrintDefaults()
 }
@@ -55,11 +58,10 @@ func main1() int {
 		return 2
 	}
 	args := flagSet.Args()
-	if len(args) == 0 {
-		flagSet.Usage()
-		return 2
-	}
 	if err := run(args...); err != nil {
+		if err == flag.ErrHelp {
+			return 2
+		}
 		fmt.Fprintln(os.Stderr, "error:", err)
 		return 1
 	}
@@ -147,6 +149,16 @@ func (f *dataFile) Save() error {
 }
 
 func run(args ...string) (err error) {
+	if len(args) == 0 {
+		flagSet.Usage()
+		return flag.ErrHelp
+	}
+	switch args[0] {
+	case "help":
+		// TODO: per-command help
+		flagSet.Usage()
+		return flag.ErrHelp
+	}
 	dir, err := userConfigDir()
 	if err != nil {
 		return err
@@ -219,7 +231,9 @@ func run(args ...string) (err error) {
 			fmt.Printf("%s\t%s\t%s\t%s\n", cipher.ID, name, uri, pw)
 		}
 	default:
+		fmt.Fprintf(os.Stderr, "unknown command: %q\n", args[0])
 		flagSet.Usage()
+		return flag.ErrHelp
 	}
 	return nil
 }
