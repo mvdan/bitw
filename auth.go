@@ -6,17 +6,14 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/pbkdf2"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 type preLoginRequest struct {
@@ -51,18 +48,12 @@ func login(ctx context.Context) error {
 	}); err != nil {
 		return fmt.Errorf("could not pre-login: %v", err)
 	}
+	data.KDF = preLogin.KDF
+	data.KDFIterations = preLogin.KDFIterations
+	saveData = true
 
-	password := []byte(os.Getenv("PASSWORD"))
-	if len(password) == 0 {
-		fd := int(os.Stdin.Fd())
-		if !terminal.IsTerminal(fd) {
-			return fmt.Errorf("non-interactive mode needs $PASSWORD")
-		}
-		var err error
-		password, err = terminal.ReadPassword(fd)
-		if err != nil {
-			return err
-		}
+	if err := fetchPassword(); err != nil {
+		return err
 	}
 
 	// First, we create the master key, with the password, the lowercase
@@ -70,14 +61,9 @@ func login(ctx context.Context) error {
 	masterKey := pbkdf2.Key(password, []byte(strings.ToLower(email)),
 		preLogin.KDFIterations, 32, sha256.New)
 
-	// symmetricKey := randBytes(64)
-	// encKey := symmetricKey[:32]
-	// macKey := symmetricKey[32:]
-	// iv := randBytes(16)
-
 	// Then we create the hashed password, with the master key as password,
 	// the password as hash, and just one iteration.
-	hashedPassword := b64enc(pbkdf2.Key(masterKey, password,
+	hashedPassword := b64enc.EncodeToString(pbkdf2.Key(masterKey, password,
 		1, 32, sha256.New))
 
 	now := time.Now().UTC()
@@ -124,18 +110,4 @@ func urlValues(pairs ...string) url.Values {
 	return vals
 }
 
-var base64Encoding = base64.StdEncoding.Strict()
-
-func b64enc(src []byte) []byte {
-	dst := make([]byte, base64Encoding.EncodedLen(len(src)))
-	base64Encoding.Encode(dst, src)
-	return dst
-}
-
-func randBytes(size int) []byte {
-	p := make([]byte, size)
-	if _, err := rand.Read(p); err != nil {
-		panic(err)
-	}
-	return p
-}
+var b64enc = base64.StdEncoding.Strict()

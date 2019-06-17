@@ -5,16 +5,26 @@ package main
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/hmac"
+	"crypto/sha256"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/knq/ini"
+	"golang.org/x/crypto/hkdf"
+	"golang.org/x/crypto/pbkdf2"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var flagSet = flag.NewFlagSet("bitw", flag.ContinueOnError)
@@ -60,10 +70,6 @@ const (
 	deviceName = "firefox"
 	deviceType = "3" // bitwarden's device type for FireFox
 	loginScope = "api offline_access"
-
-	// TODO: replace this with websocket push syncing; see
-	// https://blog.bitwarden.com/live-sync-bitwarden-apps-fb7a54569fea
-	syncInterval = 5 * time.Minute
 )
 
 // These can be overriden by the config.
@@ -71,8 +77,23 @@ var (
 	apiURL = "https://api.bitwarden.com"
 	idtURL = "https://identity.bitwarden.com"
 
-	email = os.Getenv("EMAIL")
+	email    = os.Getenv("EMAIL")
+	password []byte // TODO: make this more secure
 )
+
+func fetchPassword() error {
+	if s := os.Getenv("PASSWORD"); s != "" {
+		password = []byte(s)
+		return nil
+	}
+	fd := int(os.Stdin.Fd())
+	if !terminal.IsTerminal(fd) {
+		return fmt.Errorf("non-interactive mode needs $PASSWORD")
+	}
+	var err error
+	password, err = terminal.ReadPassword(fd)
+	return err
+}
 
 var (
 	config *ini.File
@@ -84,10 +105,12 @@ var (
 type dataFile struct {
 	path string
 
-	DeviceID     string
-	AccessToken  string
-	RefreshToken string
-	TokenExpiry  time.Time
+	DeviceID      string
+	AccessToken   string
+	RefreshToken  string
+	TokenExpiry   time.Time
+	KDF           int
+	KDFIterations int
 
 	LastSync time.Time
 	Sync     SyncData
@@ -170,12 +193,120 @@ func run(args ...string) (err error) {
 
 	ctx = context.WithValue(ctx, authToken{}, data.AccessToken)
 	switch args[0] {
+	case "login":
+		if err := login(ctx); err != nil {
+			return err
+		}
 	case "sync":
 		if err := sync(ctx); err != nil {
 			return err
+		}
+	case "dump":
+		if err := fetchPassword(); err != nil {
+			return err
+		}
+		masterKey := pbkdf2.Key(password, []byte(strings.ToLower(email)),
+			data.KDFIterations, 32, sha256.New)
+		encKey0, macKey0 := stretchKey(masterKey)
+		s, err := decrypt(encKey0, macKey0, data.Sync.Profile.Key)
+		if err != nil {
+			return err
+		}
+		encKey, macKey := s[:32], s[32:64]
+		for _, cipher := range data.Sync.Ciphers {
+			uri, err := decrypt(encKey, macKey, cipher.Login.Uri)
+			if err != nil {
+				return err
+			}
+			pw, err := decrypt(encKey, nil, cipher.Login.Password)
+			if err != nil {
+				return err
+			}
+			println(string(uri), string(pw))
 		}
 	default:
 		flagSet.Usage()
 	}
 	return nil
+}
+
+func stretchKey(orig []byte) (key, macKey []byte) {
+	key = make([]byte, 32)
+	macKey = make([]byte, 32)
+	var r io.Reader
+	r = hkdf.Expand(sha256.New, orig, []byte("enc"))
+	r.Read(key)
+	r = hkdf.Expand(sha256.New, orig, []byte("mac"))
+	r.Read(macKey)
+	return key, macKey
+}
+
+func decrypt(key, macKey []byte, cipherStr string) ([]byte, error) {
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	typ, iv, ct, mac, err := parseCipher(cipherStr)
+	if err != nil {
+		return nil, err
+	}
+	switch typ {
+	case 2:
+		// AES-CBC-256, HMAC-SHA256, base-64; continues below
+	default:
+		return nil, fmt.Errorf("unsupported cipher type %q", typ)
+	}
+
+	if macKey != nil {
+		var msg []byte
+		msg = append(msg, iv...)
+		msg = append(msg, ct...)
+		if !validMAC(msg, mac, macKey) {
+			return nil, fmt.Errorf("MAC mismatch")
+		}
+	}
+
+	decrypter := cipher.NewCBCDecrypter(c, iv)
+	decrypter.CryptBlocks(ct, ct)
+	return ct, nil
+}
+
+func parseCipher(s string) (typ int, iv, ct, mac []byte, err error) {
+	i := strings.IndexByte(s, '.')
+	if i < 0 {
+		return 0, nil, nil, nil, fmt.Errorf("invalid cipher string %q", s)
+	}
+	typStr := s[:i]
+	typ, err = strconv.Atoi(typStr)
+	if err != nil {
+		return 0, nil, nil, nil, fmt.Errorf("invalid cipher type %q", typStr)
+	}
+	s = s[i+1:]
+
+	parts := strings.Split(s, "|")
+	if len(parts) != 3 {
+		return 0, nil, nil, nil, fmt.Errorf("invalid cipher string %q", s)
+	}
+
+	iv, err = b64enc.DecodeString(parts[0])
+	if err != nil {
+		return 0, nil, nil, nil, err
+	}
+	ct, err = b64enc.DecodeString(parts[1])
+	if err != nil {
+		return 0, nil, nil, nil, err
+	}
+	mac, err = b64enc.DecodeString(parts[2])
+	if err != nil {
+		return 0, nil, nil, nil, err
+	}
+	return typ, iv, ct, mac, err
+}
+
+func validMAC(message, messageMAC, key []byte) bool {
+	mac := hmac.New(sha256.New, key)
+	mac.Write(message)
+	expectedMAC := mac.Sum(nil)
+	return hmac.Equal(messageMAC, expectedMAC)
 }
