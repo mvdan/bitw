@@ -52,7 +52,7 @@ func login(ctx context.Context) error {
 	data.KDFIterations = preLogin.KDFIterations
 	saveData = true
 
-	if err := fetchPassword(); err != nil {
+	if err := ensurePassword(); err != nil {
 		return err
 	}
 

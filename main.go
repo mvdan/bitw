@@ -81,7 +81,10 @@ var (
 	password []byte // TODO: make this more secure
 )
 
-func fetchPassword() error {
+func ensurePassword() error {
+	if len(password) > 0 {
+		return nil
+	}
 	if s := os.Getenv("PASSWORD"); s != "" {
 		password = []byte(s)
 		return nil
@@ -181,6 +184,47 @@ func run(args ...string) (err error) {
 	}
 
 	ctx := context.Background()
+
+	ctx = context.WithValue(ctx, authToken{}, data.AccessToken)
+	switch args[0] {
+	case "login":
+		if err := login(ctx); err != nil {
+			return err
+		}
+	case "sync":
+		if err := ensureToken(ctx); err != nil {
+			return err
+		}
+		if err := sync(ctx); err != nil {
+			return err
+		}
+	case "dump":
+		key, macKey, err := decryptKey()
+		if err != nil {
+			return err
+		}
+		for _, cipher := range data.Sync.Ciphers {
+			name, err := decrypt(key, macKey, cipher.Name)
+			if err != nil {
+				return err
+			}
+			uri, err := decrypt(key, macKey, cipher.Login.URI)
+			if err != nil {
+				return err
+			}
+			pw, err := decrypt(key, macKey, cipher.Login.Password)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s\t%s\t%s\t%s\n", cipher.ID, name, uri, pw)
+		}
+	default:
+		flagSet.Usage()
+	}
+	return nil
+}
+
+func ensureToken(ctx context.Context) error {
 	if data.RefreshToken == "" {
 		if err := login(ctx); err != nil {
 			return err
@@ -190,44 +234,22 @@ func run(args ...string) (err error) {
 			return err
 		}
 	}
-
-	ctx = context.WithValue(ctx, authToken{}, data.AccessToken)
-	switch args[0] {
-	case "login":
-		if err := login(ctx); err != nil {
-			return err
-		}
-	case "sync":
-		if err := sync(ctx); err != nil {
-			return err
-		}
-	case "dump":
-		if err := fetchPassword(); err != nil {
-			return err
-		}
-		masterKey := pbkdf2.Key(password, []byte(strings.ToLower(email)),
-			data.KDFIterations, 32, sha256.New)
-		encKey0, macKey0 := stretchKey(masterKey)
-		s, err := decrypt(encKey0, macKey0, data.Sync.Profile.Key)
-		if err != nil {
-			return err
-		}
-		encKey, macKey := s[:32], s[32:64]
-		for _, cipher := range data.Sync.Ciphers {
-			uri, err := decrypt(encKey, macKey, cipher.Login.Uri)
-			if err != nil {
-				return err
-			}
-			pw, err := decrypt(encKey, nil, cipher.Login.Password)
-			if err != nil {
-				return err
-			}
-			println(string(uri), string(pw))
-		}
-	default:
-		flagSet.Usage()
-	}
 	return nil
+}
+
+func decryptKey() (key, macKey []byte, err error) {
+	if err := ensurePassword(); err != nil {
+		return nil, nil, err
+	}
+	masterKey := pbkdf2.Key(password, []byte(strings.ToLower(email)),
+		data.KDFIterations, 32, sha256.New)
+	encKey0, macKey0 := stretchKey(masterKey)
+	s, err := decrypt(encKey0, macKey0, data.Sync.Profile.Key)
+	if err != nil {
+		return nil, nil, err
+	}
+	key, macKey = s[:32], s[32:64]
+	return key, macKey, nil
 }
 
 func stretchKey(orig []byte) (key, macKey []byte) {
@@ -269,7 +291,13 @@ func decrypt(key, macKey []byte, cipherStr string) ([]byte, error) {
 
 	decrypter := cipher.NewCBCDecrypter(c, iv)
 	decrypter.CryptBlocks(ct, ct)
+	ct = unpad(ct)
 	return ct, nil
+}
+
+func unpad(src []byte) []byte {
+	n := src[len(src)-1]
+	return src[:len(src)-int(n)]
 }
 
 func parseCipher(s string) (typ int, iv, ct, mac []byte, err error) {

@@ -17,7 +17,7 @@ type SyncData struct {
 }
 
 type Profile struct {
-	Id                 string
+	ID                 string
 	Name               string
 	Email              string
 	EmailVerified      bool
@@ -32,7 +32,7 @@ type Profile struct {
 }
 
 type Folder struct {
-	Id           string
+	ID           string
 	Name         string
 	RevisionDate time.Time
 }
@@ -50,15 +50,15 @@ type GlobalEquivalentDomains struct {
 
 type Cipher struct {
 	Type                int
-	FolderId            string
-	OrganizationId      string
+	FolderID            string
+	OrganizationID      string
 	Favorite            bool
 	Edit                bool
-	Id                  string
+	ID                  string
 	Attachments         []string
 	OrganizationUseTotp bool
 	RevisionDate        time.Time
-	CollectionIds       []string
+	CollectionIDs       []string
 
 	Card       string
 	Fields     []string
@@ -72,14 +72,14 @@ type Cipher struct {
 type Login struct {
 	Password string
 	Totp     string
-	Uri      string
-	Uris     []Uri
+	URI      string
+	URIs     []URI
 	Username string
 }
 
-type Uri struct {
-	Uri   *string
-	Match *int
+type URI struct {
+	URI   string
+	Match int
 }
 
 type SecureNote struct {
