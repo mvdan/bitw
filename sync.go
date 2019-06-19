@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -67,6 +68,17 @@ type Cipher struct {
 	Name       string
 	Notes      string
 	SecureNote SecureNote
+}
+
+func (c *Cipher) Match(attr, value string) bool {
+	switch strings.ToLower(attr) {
+	case "id":
+		return c.ID == value
+	case "name":
+		// TODO: this needs decrypting
+		return c.Name == value
+	}
+	return false
 }
 
 type Login struct {

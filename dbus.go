@@ -6,11 +6,21 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/godbus/dbus"
 )
 
-const dbusName = "org.freedesktop.secrets"
+const (
+	dbusName  = "org.freedesktop.secrets"
+	objPrefix = "/org/freedesktop/secrets"
+)
+
+var errNotSupported = dbus.NewError("org.freedesktop.DBus.Error.NotSupported", nil)
+
+func objPath(suffix string) dbus.ObjectPath {
+	return dbus.ObjectPath(objPrefix + suffix)
+}
 
 func serveDBus(ctx context.Context) error {
 	conn, err := dbus.SessionBus()
@@ -19,7 +29,7 @@ func serveDBus(ctx context.Context) error {
 	}
 
 	srv := &dbusService{}
-	conn.Export(srv, "/org/freedesktop/secrets", "org.freedesktop.Secret.Service")
+	conn.Export(srv, objPrefix, "org.freedesktop.Secret.Service")
 
 	reply, err := conn.RequestName(dbusName, dbus.NameFlagDoNotQueue)
 	if err != nil {
@@ -29,7 +39,7 @@ func serveDBus(ctx context.Context) error {
 		return fmt.Errorf("name already taken")
 	}
 	fmt.Printf("Listening on %s\n", dbusName)
-	select {}
+	select {} // block forever; handling is via callbacks
 }
 
 type dbusService struct {
@@ -39,18 +49,26 @@ type dbusService struct {
 func (d *dbusService) OpenSession(algo string, input dbus.Variant) (output dbus.Variant, result dbus.ObjectPath, _ *dbus.Error) {
 	switch algo {
 	case "plain":
-		output = dbus.MakeVariant("")
-		result = "/org/freedesktop/secrets/session/default"
-		return
+		return dbus.MakeVariant(""), objPath("/session/default"), nil
 	default:
 		// TODO: support dh-ietf1024-sha256-aes128-cbc-pkcs7?
-		return output, "/", dbus.NewError("org.freedesktop.DBus.Error.NotSupported", nil)
+		return output, "/", errNotSupported
 	}
 }
 
-func (d *dbusService) SearchItems(fields map[string]string) (unlocked, locked []dbus.ObjectPath, _ *dbus.Error) {
-	fmt.Println(fields)
-	unlocked = []dbus.ObjectPath{"/org/freedesktop/secrets/collection/default/somesecret"}
+func (d *dbusService) SearchItems(attributes map[string]string) (unlocked, locked []dbus.ObjectPath, _ *dbus.Error) {
+Ciphers:
+	for _, cipher := range data.Sync.Ciphers {
+		for attr, value := range attributes {
+			if !cipher.Match(attr, value) {
+				continue Ciphers
+			}
+		}
+		// Object paths can only contain letters, numbers, and
+		// underscores.
+		id := strings.Replace(cipher.ID, "-", "", -1)
+		unlocked = append(unlocked, objPath("/collections/default/"+id))
+	}
 	return
 }
 
@@ -62,7 +80,6 @@ type dbusSecret struct {
 }
 
 func (d *dbusService) GetSecrets(items []dbus.ObjectPath, session dbus.ObjectPath) (secrets map[dbus.ObjectPath]dbusSecret, _ *dbus.Error) {
-	fmt.Println(items, session)
 	secrets = make(map[dbus.ObjectPath]dbusSecret)
 	for _, item := range items {
 		secrets[item] = dbusSecret{
