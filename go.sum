@@ -1,3 +1,5 @@
+github.com/godbus/dbus v5.0.0+incompatible h1:0R1TN5iM7CUxYjmE8nWCTq0hyr1V1LnjPfCNV/6AUFI=
+github.com/godbus/dbus v5.0.0+incompatible/go.mod h1:/YcGZj5zSblfDWMMoOzV4fas9FZnQYTkDnsGvmh2Grw=
 github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/knq/ini v0.0.0-20181118015158-a301e724bd35 h1:et/xKFFaPqT7bV8MOn5KVnNiqenWdE9KM8fPlni6z0g=

@@ -19,4 +19,4 @@ Talking to BitWarden:
 
 Integrating with the OS:
 
-* https://freedesktop.org/wiki/Specifications/secret-storage-spec/secrets-api-0.1.html
+* https://specifications.freedesktop.org/secret-service/

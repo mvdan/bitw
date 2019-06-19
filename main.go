@@ -41,8 +41,9 @@ Commands:
 
 	help    show a command's help text
 	sync    fetch the latest data from the server
-	dump    list all the stored login secrets
 	login   force a new login, even if not necessary
+	dump    list all the stored login secrets
+	serve   start the org.freedesktop.secrets D-Bus service
 `[1:])
 	flagSet.PrintDefaults()
 }
@@ -229,6 +230,10 @@ func run(args ...string) (err error) {
 				return err
 			}
 			fmt.Printf("%s\t%s\t%s\t%s\n", cipher.ID, name, uri, pw)
+		}
+	case "serve":
+		if err := serveDBus(ctx); err != nil {
+			return err
 		}
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %q\n", args[0])
