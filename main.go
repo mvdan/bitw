@@ -255,6 +255,11 @@ func ensureToken(ctx context.Context) error {
 }
 
 func decryptKey() (key, macKey []byte, err error) {
+	if email == "" {
+		// If the user specified $EMAIL just for the login, grab it from
+		// the data file now.
+		email = data.Sync.Profile.Email
+	}
 	if err := ensurePassword(); err != nil {
 		return nil, nil, err
 	}

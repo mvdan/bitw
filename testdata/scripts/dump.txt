@@ -1,0 +1,17 @@
+# Ensure we have the data.json with synced data.
+cp $CONFIG_DIR/data-notfa.json $CONFIG_DIR/data.json
+grep '"Email": "testnotfa@mvdan.cc",' $CONFIG_DIR/data.json
+
+! bitw dump
+! stdout .
+stderr 'non-interactive mode needs \$PASSWORD'
+
+[!env:PASSWORD_NOTFA] skip 'requires $PASSWORD_NOTFA for testnotfa@mvdan.cc'
+
+# The testnotfa account has a few dummy secrets, such as the login1 password.
+env PASSWORD=$PASSWORD_NOTFA
+
+bitw dump
+stdout 'login1'
+stdout 'domain1\.com'
+stdout 'password1'

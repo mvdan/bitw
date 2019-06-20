@@ -1,5 +1,6 @@
 [!net] skip 'requires connecting to bitwarden.com'
 
+# Ensure we haven't logged in.
 ! grep AccessToken $CONFIG_DIR/data.json
 
 ! bitw login
