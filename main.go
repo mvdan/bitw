@@ -52,10 +52,6 @@ func main() { os.Exit(main1()) }
 
 func main1() int {
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		if err != flag.ErrHelp {
-			fmt.Fprintf(os.Stderr, "flag: %v\n", err)
-			flagSet.Usage()
-		}
 		return 2
 	}
 	args := flagSet.Args()

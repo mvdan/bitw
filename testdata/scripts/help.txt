@@ -1,0 +1,22 @@
+! bitw
+stderr -count=1 'Usage of'
+stderr -count=1 '\thelp'
+stderr -count=1 '\tserve'
+! stdout .
+
+! bitw -h
+stderr -count=1 'Usage of'
+! stdout .
+
+! bitw help
+stderr -count=1 'Usage of'
+! stdout .
+
+! bitw badcmd
+stderr -count=1 'Usage of'
+stderr -count=1 'unknown command: "badcmd"'
+! stdout .
+
+! bitw -badflag
+stderr -count=1 'Usage of'
+! stdout .
