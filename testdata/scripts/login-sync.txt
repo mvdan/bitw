@@ -1,0 +1,21 @@
+[!net] skip 'requires connecting to bitwarden.com'
+
+! grep AccessToken $CONFIG_DIR/data.json
+
+! bitw login
+stderr 'need a configured email'
+
+# This is a test account with a dummy password, and no two-factor auth set up.
+env EMAIL=testnotfa@mvdan.cc
+
+! bitw login
+stderr 'non-interactive mode needs \$PASSWORD'
+
+[!env:PASSWORD_NOTFA] skip 'requires $PASSWORD_NOTFA for testnotfa@mvdan.cc'
+
+env PASSWORD=$PASSWORD_NOTFA
+
+bitw login
+
+grep AccessToken $CONFIG_DIR/data.json
+! grep Ciphers $CONFIG_DIR/data.json

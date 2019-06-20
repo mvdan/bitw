@@ -156,11 +156,13 @@ func run(args ...string) (err error) {
 		flagSet.Usage()
 		return flag.ErrHelp
 	}
-	dir, err := userConfigDir()
-	if err != nil {
-		return err
+	dir := os.Getenv("CONFIG_DIR")
+	if dir == "" {
+		if dir, err = userConfigDir(); err != nil {
+			return err
+		}
+		dir = filepath.Join(dir, "bitw")
 	}
-	dir = filepath.Join(dir, "bitw")
 	config, err = ini.LoadFile(filepath.Join(dir, "config"))
 	if err != nil {
 		return err
