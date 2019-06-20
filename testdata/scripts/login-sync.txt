@@ -13,9 +13,21 @@ stderr 'non-interactive mode needs \$PASSWORD'
 
 [!env:PASSWORD_NOTFA] skip 'requires $PASSWORD_NOTFA for testnotfa@mvdan.cc'
 
-env PASSWORD=$PASSWORD_NOTFA
+# Login will work, granted the password is present.
 
+env PASSWORD=$PASSWORD_NOTFA
 bitw login
 
 grep AccessToken $CONFIG_DIR/data.json
-! grep Ciphers $CONFIG_DIR/data.json
+! grep '"Name": "Test Without TFA",' $CONFIG_DIR/data.json
+! grep '"Email": "testnotfa@mvdan.cc",' $CONFIG_DIR/data.json
+
+# Syncing just needs the token, not the password.
+
+env PASSWORD=
+bitw sync
+
+grep '"Name": "Test Without TFA",' $CONFIG_DIR/data.json
+grep '"Email": "testnotfa@mvdan.cc",' $CONFIG_DIR/data.json
+
+[write] cp $CONFIG_DIR/data.json $TESTDATA/data-notfa.json

@@ -4,6 +4,7 @@
 package main
 
 import (
+	"flag"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -19,8 +20,20 @@ func TestMain(m *testing.M) {
 	}))
 }
 
+var write = flag.Bool("w", false, "update saved testdata files")
+
 func TestScripts(t *testing.T) {
 	t.Parallel()
+
+	testdata, err := filepath.Abs("testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Don't stop on an error, to let a test write to the path. The test
+	// needing the file can skip itself.
+	savedData, _ := ioutil.ReadFile(filepath.Join(testdata, "data-notfa.json"))
+
 	testscript.Run(t, testscript.Params{
 		Dir: filepath.Join("testdata", "scripts"),
 		Setup: func(env *testscript.Env) error {
@@ -29,6 +42,11 @@ func TestScripts(t *testing.T) {
 
 			cfgDir := filepath.Join(home, "config")
 			env.Vars = append(env.Vars, "CONFIG_DIR="+cfgDir)
+			if err := os.MkdirAll(cfgDir, 0755); err != nil {
+				return err
+			}
+
+			env.Vars = append(env.Vars, "TESTDATA="+testdata)
 
 			// Secrets should pass through.
 			for _, name := range [...]string{
@@ -37,11 +55,13 @@ func TestScripts(t *testing.T) {
 				env.Vars = append(env.Vars, name+"="+os.Getenv(name))
 			}
 
-			if err := os.MkdirAll(cfgDir, 0755); err != nil {
+			path := filepath.Join(cfgDir, "data.json")
+			if err := ioutil.WriteFile(path, baseData, 0600); err != nil {
 				return err
 			}
-			dataPath := filepath.Join(cfgDir, "data.json")
-			if err := ioutil.WriteFile(dataPath, baseData, 0600); err != nil {
+
+			path = filepath.Join(cfgDir, "data-notfa.json")
+			if err := ioutil.WriteFile(path, savedData, 0600); err != nil {
 				return err
 			}
 			return nil
@@ -49,6 +69,10 @@ func TestScripts(t *testing.T) {
 		Condition: func(cond string) (bool, error) {
 			if strings.HasPrefix(cond, "env:") {
 				return os.Getenv(cond[4:]) != "", nil
+			}
+			switch cond {
+			case "write":
+				return *write, nil
 			}
 			return false, nil
 		},
