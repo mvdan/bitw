@@ -1,0 +1,30 @@
+# Ensure we have the data.json with synced data.
+cp $CONFIG_DIR/data-notfa.json $CONFIG_DIR/data.json
+grep '"Email": "testnotfa@mvdan.cc",' $CONFIG_DIR/data.json
+
+[!env:PASSWORD_NOTFA] skip 'requires $PASSWORD_NOTFA for testnotfa@mvdan.cc'
+
+[!exec:dbus-daemon] skip 'dbus is not installed'
+[!exec:secret-tool] skip 'secret-tool (libsecret) is not installed'
+
+# Start the DBus server.
+! exec dbus-daemon --session --nopidfile --nofork --address=unix:path=$WORK/bus &
+env DBUS_SESSION_BUS_ADDRESS=unix:path=$WORK/bus
+
+# Wait for the DBus socket to be ready.
+waitfile $WORK/bus
+
+# Start the service. It is stopped via os.Interrupt/os.Kill once the test
+# finishes.
+env PASSWORD=$PASSWORD_NOTFA
+! bitw serve &
+
+# Wait for the DBus service to be ready.
+waitexec secret-tool search dummy attribute
+
+# Get a single secret.
+exec secret-tool lookup id e774c52d-aebb-4c40-aae7-aa6d00f13011
+stdout 'supersecret'
+
+! exec secret-tool lookup id missing
+! stdout .

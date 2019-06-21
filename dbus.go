@@ -16,17 +16,22 @@ const (
 	objPrefix = "/org/freedesktop/secrets"
 )
 
-var errNotSupported = dbus.NewError("org.freedesktop.DBus.Error.NotSupported", nil)
+var (
+	errNotSupported = dbus.NewError("org.freedesktop.DBus.Error.NotSupported", nil)
+	errAlreadyTaken = fmt.Errorf("dbus name %s already taken", dbusName)
+)
 
 func objPath(suffix string) dbus.ObjectPath {
 	return dbus.ObjectPath(objPrefix + suffix)
 }
 
 func serveDBus(ctx context.Context) error {
+	// TODO: use SessionBusPrivate
 	conn, err := dbus.SessionBus()
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 
 	srv := &dbusService{}
 	conn.Export(srv, objPrefix, "org.freedesktop.Secret.Service")
@@ -36,9 +41,11 @@ func serveDBus(ctx context.Context) error {
 		return err
 	}
 	if reply != dbus.RequestNameReplyPrimaryOwner {
-		return fmt.Errorf("name already taken")
+		return errAlreadyTaken
 	}
+
 	fmt.Printf("Listening on %s\n", dbusName)
+	// TODO: use ctx
 	select {} // block forever; handling is via callbacks
 }
 

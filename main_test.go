@@ -5,11 +5,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/rogpeppe/go-internal/testscript"
 )
@@ -17,6 +20,37 @@ import (
 func TestMain(m *testing.M) {
 	os.Exit(testscript.RunMain(m, map[string]func() int{
 		"bitw": main1,
+		"waitfile": func() int {
+		Files:
+			for _, path := range os.Args[1:] {
+				fmt.Println(path[1:])
+				for i := 0; i < 10; i++ {
+					if _, err := os.Lstat(path); err == nil {
+						continue Files
+					} else {
+						fmt.Println(err)
+					}
+					time.Sleep(10 * time.Millisecond)
+				}
+				fmt.Printf("timed out waiting for %q\n", path)
+				return 1
+			}
+			return 0
+		},
+		"waitexec": func() int {
+			for i := 0; i < 10; i++ {
+				cmd := exec.Command(os.Args[1], os.Args[2:]...)
+				if out, err := cmd.CombinedOutput(); err == nil {
+					return 0
+				} else {
+					fmt.Println(string(out))
+					fmt.Println(err)
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+			fmt.Printf("timed out waiting for %q\n", os.Args[1:])
+			return 1
+		},
 	}))
 }
 
