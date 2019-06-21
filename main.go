@@ -15,6 +15,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -56,7 +57,10 @@ func main1() int {
 	}
 	args := flagSet.Args()
 	if err := run(args...); err != nil {
-		if err == flag.ErrHelp {
+		switch err {
+		case context.Canceled:
+			return 0
+		case flag.ErrHelp:
 			return 2
 		}
 		fmt.Fprintln(os.Stderr, "error:", err)
@@ -195,6 +199,14 @@ func run(args ...string) (err error) {
 	}
 
 	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		cancel()
+	}()
 
 	ctx = context.WithValue(ctx, authToken{}, data.AccessToken)
 	switch args[0] {

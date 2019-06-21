@@ -26,12 +26,17 @@ func objPath(suffix string) dbus.ObjectPath {
 }
 
 func serveDBus(ctx context.Context) error {
-	// TODO: use SessionBusPrivate
-	conn, err := dbus.SessionBus()
+	conn, err := dbus.SessionBusPrivate()
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
+	if err := conn.Auth(nil); err != nil {
+		return err
+	}
+	if err := conn.Hello(); err != nil {
+		return err
+	}
 
 	srv := &dbusService{}
 	conn.Export(srv, objPrefix, "org.freedesktop.Secret.Service")
@@ -45,8 +50,9 @@ func serveDBus(ctx context.Context) error {
 	}
 
 	fmt.Printf("Listening on %s\n", dbusName)
-	// TODO: use ctx
-	select {} // block forever; handling is via callbacks
+	<-ctx.Done()
+	conn.Close()
+	return ctx.Err()
 }
 
 type dbusService struct {
