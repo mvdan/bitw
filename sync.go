@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 )
@@ -71,14 +72,20 @@ type Cipher struct {
 }
 
 func (c *Cipher) Match(attr, value string) bool {
+	got := ""
+	var err error
 	switch strings.ToLower(attr) {
 	case "id":
-		return c.ID == value
+		got = c.ID
 	case "name":
-		dec, _ := decrypt(c.Name)
-		return string(dec) == value
+		got, err = decryptStr(c.Name)
+	default:
+		return false
 	}
-	return false
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not decrypt %s: %v", attr, err)
+	}
+	return got == value
 }
 
 type Login struct {

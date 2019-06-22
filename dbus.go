@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/godbus/dbus"
@@ -18,8 +19,15 @@ const (
 
 var (
 	errNotSupported = dbus.NewError("org.freedesktop.DBus.Error.NotSupported", nil)
+	errNoSuchObject = dbus.NewError("org.freedesktop.Secret.Error.NoSuchObject", nil)
 	errAlreadyTaken = fmt.Errorf("dbus name %s already taken", dbusName)
 )
+
+func dbusErrorf(format string, args ...interface{}) *dbus.Error {
+	return dbus.NewError("org.freedesktop.DBus.Error.Failed", []interface{}{
+		fmt.Sprintf(format, args...),
+	})
+}
 
 func objPath(suffix string) dbus.ObjectPath {
 	return dbus.ObjectPath(objPrefix + suffix)
@@ -55,9 +63,7 @@ func serveDBus(ctx context.Context) error {
 	return ctx.Err()
 }
 
-type dbusService struct {
-	DefaultCollection dbus.ObjectPath
-}
+type dbusService struct{}
 
 func (d *dbusService) OpenSession(algo string, input dbus.Variant) (output dbus.Variant, result dbus.ObjectPath, _ *dbus.Error) {
 	switch algo {
@@ -79,10 +85,14 @@ Ciphers:
 		}
 		// Object paths can only contain letters, numbers, and
 		// underscores.
-		id := strings.Replace(cipher.ID, "-", "", -1)
+		id := dbusID(cipher.ID)
 		unlocked = append(unlocked, objPath("/collections/default/"+id))
 	}
 	return
+}
+
+func dbusID(id string) string {
+	return strings.Replace(id, "-", "", -1)
 }
 
 type dbusSecret struct {
@@ -95,9 +105,25 @@ type dbusSecret struct {
 func (d *dbusService) GetSecrets(items []dbus.ObjectPath, session dbus.ObjectPath) (secrets map[dbus.ObjectPath]dbusSecret, _ *dbus.Error) {
 	secrets = make(map[dbus.ObjectPath]dbusSecret)
 	for _, item := range items {
+		id := path.Base(string(item))
+
+		var found Cipher
+		for _, cipher := range data.Sync.Ciphers {
+			if dbusID(cipher.ID) == id {
+				found = cipher
+				break
+			}
+		}
+		if found.ID == "" {
+			return nil, errNoSuchObject
+		}
+		password, err := decrypt(found.Login.Password)
+		if err != nil {
+			return nil, dbusErrorf("%s", err)
+		}
 		secrets[item] = dbusSecret{
 			Session:     session,
-			Value:       []byte("supersecret"),
+			Value:       password,
 			ContentType: "text/plain",
 		}
 	}

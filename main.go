@@ -99,8 +99,14 @@ func ensurePassword() error {
 	if !terminal.IsTerminal(fd) {
 		return fmt.Errorf("non-interactive mode needs $PASSWORD")
 	}
+
+	// TODO: Support cancellation with ^C. Currently not possible in any
+	// simple way. Closing os.Stdin on cancel doesn't seem to do the trick
+	// either.
+	fmt.Printf("Password: ")
 	var err error
 	password, err = terminal.ReadPassword(fd)
+	fmt.Println()
 	return err
 }
 
@@ -281,7 +287,8 @@ func ensureDecryptKey() error {
 		data.KDFIterations, 32, sha256.New)
 
 	// We decrypt the decryption key from the synced data, using the key
-	// resulting from stretching masterKey.
+	// resulting from stretching masterKey. The keys will be overwritten
+	// once we decrypt the final ones.
 	key, macKey = stretchKey(masterKey)
 
 	s, err := decrypt(data.Sync.Profile.Key)
@@ -301,6 +308,14 @@ func stretchKey(orig []byte) (key, macKey []byte) {
 	r = hkdf.Expand(sha256.New, orig, []byte("mac"))
 	r.Read(macKey)
 	return key, macKey
+}
+
+func decryptStr(cipherStr string) (string, error) {
+	dec, err := decrypt(cipherStr)
+	if err != nil {
+		return "", err
+	}
+	return string(dec), nil
 }
 
 func decrypt(cipherStr string) ([]byte, error) {
