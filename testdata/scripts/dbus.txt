@@ -26,5 +26,14 @@ waitexec secret-tool search dummy attribute
 exec secret-tool lookup id e774c52d-aebb-4c40-aae7-aa6d00f13011
 stdout 'supersecret'
 
+exec secret-tool lookup name login1
+stdout 'supersecret'
+
 ! exec secret-tool lookup id missing
 ! stdout .
+
+# Search for secrets.
+
+# TODO: fix this
+# exec secret-tool search name login1
+# stdout 'supersecret'

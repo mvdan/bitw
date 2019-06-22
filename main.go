@@ -80,8 +80,11 @@ var (
 	apiURL = "https://api.bitwarden.com"
 	idtURL = "https://identity.bitwarden.com"
 
-	email    = os.Getenv("EMAIL")
-	password []byte // TODO: make this more secure
+	email = os.Getenv("EMAIL")
+
+	// TODO: make these more secure
+	password    []byte
+	key, macKey []byte
 )
 
 func ensurePassword() error {
@@ -222,20 +225,16 @@ func run(args ...string) (err error) {
 			return err
 		}
 	case "dump":
-		key, macKey, err := decryptKey()
-		if err != nil {
-			return err
-		}
 		for _, cipher := range data.Sync.Ciphers {
-			name, err := decrypt(key, macKey, cipher.Name)
+			name, err := decrypt(cipher.Name)
 			if err != nil {
 				return err
 			}
-			uri, err := decrypt(key, macKey, cipher.Login.URI)
+			uri, err := decrypt(cipher.Login.URI)
 			if err != nil {
 				return err
 			}
-			pw, err := decrypt(key, macKey, cipher.Login.Password)
+			pw, err := decrypt(cipher.Login.Password)
 			if err != nil {
 				return err
 			}
@@ -266,24 +265,31 @@ func ensureToken(ctx context.Context) error {
 	return nil
 }
 
-func decryptKey() (key, macKey []byte, err error) {
+func ensureDecryptKey() error {
+	if len(key) > 0 {
+		return nil
+	}
 	if email == "" {
 		// If the user specified $EMAIL just for the login, grab it from
 		// the data file now.
 		email = data.Sync.Profile.Email
 	}
 	if err := ensurePassword(); err != nil {
-		return nil, nil, err
+		return err
 	}
 	masterKey := pbkdf2.Key(password, []byte(strings.ToLower(email)),
 		data.KDFIterations, 32, sha256.New)
-	encKey0, macKey0 := stretchKey(masterKey)
-	s, err := decrypt(encKey0, macKey0, data.Sync.Profile.Key)
+
+	// We decrypt the decryption key from the synced data, using the key
+	// resulting from stretching masterKey.
+	key, macKey = stretchKey(masterKey)
+
+	s, err := decrypt(data.Sync.Profile.Key)
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
 	key, macKey = s[:32], s[32:64]
-	return key, macKey, nil
+	return nil
 }
 
 func stretchKey(orig []byte) (key, macKey []byte) {
@@ -297,7 +303,10 @@ func stretchKey(orig []byte) (key, macKey []byte) {
 	return key, macKey
 }
 
-func decrypt(key, macKey []byte, cipherStr string) ([]byte, error) {
+func decrypt(cipherStr string) ([]byte, error) {
+	if err := ensureDecryptKey(); err != nil {
+		return nil, err
+	}
 	c, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

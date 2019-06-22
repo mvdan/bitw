@@ -75,8 +75,8 @@ func (c *Cipher) Match(attr, value string) bool {
 	case "id":
 		return c.ID == value
 	case "name":
-		// TODO: this needs decrypting
-		return c.Name == value
+		dec, _ := decrypt(c.Name)
+		return string(dec) == value
 	}
 	return false
 }
