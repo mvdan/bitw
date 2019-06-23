@@ -96,7 +96,7 @@ func ensurePassword() error {
 		return nil
 	}
 	var err error
-	password, err = prompt("Password: ")
+	password, err = prompt("Password")
 	return err
 }
 
@@ -131,7 +131,7 @@ func prompt(line string) ([]byte, error) {
 	fd := int(os.Stdin.Fd())
 	switch {
 	case terminal.IsTerminal(fd):
-		fmt.Print(line)
+		fmt.Printf("%s: ", line)
 		password, err := terminal.ReadPassword(fd)
 		fmt.Println()
 		return password, err

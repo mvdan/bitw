@@ -1,14 +1,41 @@
 # bitw
 
-A simple BitWarden client.
+[![CircleCI](https://circleci.com/gh/mvdan/bitw.svg?style=svg)](https://circleci.com/gh/mvdan/bitw)
+
+A simple BitWarden client. Requires Go 1.12 or later.
 
 	cd $(mktemp -d); go mod init tmp; go get mvdan.cc/bitw
 
 The goal is a static and portable client which integrates well with one's
-system. For example, on Linux it will implement the `org.freedesktop.secrets`
-D-Bus service.
+system. For example, on Linux it implements the `org.freedesktop.secrets` D-Bus
+service.
 
 Note that this tool is still a work in progress.
+
+#### Quickstart
+
+Log in and sync, providin a password when asked:
+
+	export EMAIL=you@domain.com
+	bitw sync
+
+You can then view your secrets:
+
+	bitw dump
+
+You can also start the D-Bus service, and use it:
+
+	bitw serve
+	secret-tool lookup name mysecret
+
+#### Non-goals
+
+These features are not planned at the moment:
+
+* A graphical interface - use `vault.bitwarden.com`
+* Modifying and importing secrets - use `vault.bitwarden.com`
+* Querying secrets - use D-Bus clients like `secret-tool`
+* Integration with gnome-keyring - they both implement the same D-Bus service
 
 #### Further reading
 

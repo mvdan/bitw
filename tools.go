@@ -2,6 +2,4 @@
 
 package tools
 
-import (
-	_ "rsc.io/2fa"
-)
+import _ "rsc.io/2fa"
