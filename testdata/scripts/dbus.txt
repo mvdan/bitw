@@ -7,8 +7,8 @@ grep '"Email": "testnotfa@mvdan.cc",' $CONFIG_DIR/data.json
 [!exec:dbus-daemon] skip 'dbus is not installed'
 [!exec:secret-tool] skip 'secret-tool (libsecret) is not installed'
 
-# Start the DBus server.
-! exec dbus-daemon --session --nofork --nosyslog --nopidfile --address=unix:path=$WORK/bus &
+# Start the DBus server. TODO: add --nosyslog once CI uses a new enough DBus.
+! exec dbus-daemon --session --nofork --nopidfile --address=unix:path=$WORK/bus &
 env DBUS_SESSION_BUS_ADDRESS=unix:path=$WORK/bus
 
 # Wait for the DBus socket to be ready.

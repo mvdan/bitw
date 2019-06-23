@@ -119,7 +119,11 @@ func (d *dbusService) GetAll(msg dbus.Message, iface string) (map[string]dbus.Va
 	switch iface {
 	case "org.freedesktop.Secret.Item":
 		props["Locked"] = dbus.MakeVariant(false)
-		props["Attributes"] = dbus.MakeVariant(map[string]string{})
+		props["Attributes"] = dbus.MakeVariant(map[string]string{
+			// Old secret-tool versions may panic if this attribute
+			// is left out.
+			"xdg:schema": "",
+		})
 		cipher, ok := d.secretByPath(item)
 		if !ok {
 			return nil, errNoSuchObject
