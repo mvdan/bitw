@@ -1,0 +1,49 @@
+[short] skip 'bitwarden.com roundtrips are slow and may get blocked'
+[!net] skip 'requires connecting to bitwarden.com'
+
+# Ensure we haven't logged in.
+! grep AccessToken $CONFIG_DIR/data.json
+
+# This is a test account with a dummy password, and no two-factor auth set up.
+env EMAIL=testwithtfa@mvdan.cc
+
+[!env:PASSWORD_WITHTFA] skip 'requires $PASSWORD_WITHTFA for testwithtfa@mvdan.cc'
+[!env:TFAKEY] skip 'requires $TFAKEY for testwithtfa@mvdan.cc'
+
+# Login will work, granted the password is present.
+
+env PASSWORD=$PASSWORD_WITHTFA
+env FORCE_STDIN_PROMPTS=true
+
+2fa $TFAKEY tfatoken
+
+stdin tfatoken
+bitw login
+[file:toomany] skip 'too many two-factor auth requests, try again later'
+
+grep AccessToken $CONFIG_DIR/data.json
+! grep '"Name": "Test With TFA",' $CONFIG_DIR/data.json
+! grep '"Email": "testwithtfa@mvdan.cc",' $CONFIG_DIR/data.json
+
+# Syncing just needs the token, not the password.
+
+env PASSWORD=
+bitw sync
+
+grep '"Name": "Test With TFA",' $CONFIG_DIR/data.json
+grep '"Email": "testwithtfa@mvdan.cc",' $CONFIG_DIR/data.json
+
+# Test the bad token after the good token, to make it less likely that the
+# correct attempt gets skipped due to "too many requests".
+
+env PASSWORD=$PASSWORD_WITHTFA
+
+stdin badtoken
+! bitw login
+[file:toomany] skip 'too many two-factor auth requests, try again later'
+stderr 'could not login via two-factor'
+stderr 'Two-step token is invalid'
+
+
+-- badtoken --
+12345678

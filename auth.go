@@ -8,8 +8,10 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -71,7 +73,7 @@ func login(ctx context.Context) error {
 	// For some reason, this endpoint requires url-encoded values, and won't
 	// accept JSON. But of course, the response is JSON.
 	var tokLogin tokLoginResponse
-	err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, urlValues(
+	values := urlValues(
 		"grant_type", "password",
 		"username", email,
 		"password", string(hashedPassword),
@@ -80,12 +82,30 @@ func login(ctx context.Context) error {
 		"deviceType", deviceType,
 		"deviceIdentifier", data.DeviceID,
 		"deviceName", deviceName,
-	))
+	)
+	err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values)
 	errsc, ok := err.(*errStatusCode)
 	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
-		return fmt.Errorf("TODO: tfa")
-	}
-	if err != nil {
+		var twoFactor twoFactorResponse
+		if err := json.Unmarshal(errsc.body, &twoFactor); err != nil {
+			return err
+		}
+		if n := len(twoFactor.TwoFactorProviders); n != 1 {
+			return fmt.Errorf("expected one two-factor auth provider, found %d", n)
+		}
+		provider := twoFactor.TwoFactorProviders[0]
+		tfaToken, err := prompt("Six-digit Two-factor auth token:")
+		if err != nil {
+			return err
+		}
+		values.Set("twoFactorToken", string(tfaToken))
+		values.Set("twoFactorProvider", strconv.Itoa(provider))
+		values.Set("twoFactorRemember", "1")
+		tokLogin = tokLoginResponse{}
+		if err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values); err != nil {
+			return fmt.Errorf("could not login via two-factor: %v", err)
+		}
+	} else if err != nil {
 		return fmt.Errorf("could not login via password: %v", err)
 	}
 	data.AccessToken = tokLogin.AccessToken

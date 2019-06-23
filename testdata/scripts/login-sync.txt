@@ -1,3 +1,4 @@
+[short] skip 'bitwarden.com roundtrips are slow and may get blocked'
 [!net] skip 'requires connecting to bitwarden.com'
 
 # Ensure we haven't logged in.
@@ -10,7 +11,7 @@ stderr 'need a configured email'
 env EMAIL=testnotfa@mvdan.cc
 
 ! bitw login
-stderr 'non-interactive mode needs \$PASSWORD'
+stderr 'need a terminal to prompt'
 
 [!env:PASSWORD_NOTFA] skip 'requires $PASSWORD_NOTFA for testnotfa@mvdan.cc'
 

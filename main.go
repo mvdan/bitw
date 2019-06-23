@@ -49,9 +49,9 @@ Commands:
 	flagSet.PrintDefaults()
 }
 
-func main() { os.Exit(main1()) }
+func main() { os.Exit(main1(os.Stderr)) }
 
-func main1() int {
+func main1(stderr io.Writer) int {
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
 		return 2
 	}
@@ -63,7 +63,7 @@ func main1() int {
 		case flag.ErrHelp:
 			return 2
 		}
-		fmt.Fprintln(os.Stderr, "error:", err)
+		fmt.Fprintln(stderr, "error:", err)
 		return 1
 	}
 	return 0
@@ -95,19 +95,51 @@ func ensurePassword() error {
 		password = []byte(s)
 		return nil
 	}
-	fd := int(os.Stdin.Fd())
-	if !terminal.IsTerminal(fd) {
-		return fmt.Errorf("non-interactive mode needs $PASSWORD")
-	}
+	var err error
+	password, err = prompt("Password: ")
+	return err
+}
 
+// readLine is similar to terminal.ReadPassword, but it doesn't use key codes.
+func readLine(r io.Reader) ([]byte, error) {
+	var buf [1]byte
+	var line []byte
+	for {
+		n, err := r.Read(buf[:])
+		if n > 0 {
+			switch buf[0] {
+			case '\n', '\r':
+				return line, nil
+			default:
+				line = append(line, buf[0])
+			}
+		} else if err != nil {
+			if err == io.EOF && len(line) > 0 {
+				return line, nil
+			}
+			return nil, err
+		}
+	}
+}
+
+func prompt(line string) ([]byte, error) {
 	// TODO: Support cancellation with ^C. Currently not possible in any
 	// simple way. Closing os.Stdin on cancel doesn't seem to do the trick
-	// either.
-	fmt.Printf("Password: ")
-	var err error
-	password, err = terminal.ReadPassword(fd)
-	fmt.Println()
-	return err
+	// either. Simply doing an os.Exit keeps the terminal broken because of
+	// ReadPassword.
+
+	fd := int(os.Stdin.Fd())
+	switch {
+	case terminal.IsTerminal(fd):
+		fmt.Print(line)
+		password, err := terminal.ReadPassword(fd)
+		fmt.Println()
+		return password, err
+	case os.Getenv("FORCE_STDIN_PROMPTS") == "true":
+		return readLine(os.Stdin)
+	default:
+		return nil, fmt.Errorf("need a terminal to prompt for a password")
+	}
 }
 
 var (

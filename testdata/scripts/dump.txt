@@ -4,7 +4,7 @@ grep '"Email": "testnotfa@mvdan.cc",' $CONFIG_DIR/data.json
 
 ! bitw dump
 ! stdout .
-stderr 'non-interactive mode needs \$PASSWORD'
+stderr 'need a terminal to prompt'
 
 [!env:PASSWORD_NOTFA] skip 'requires $PASSWORD_NOTFA for testnotfa@mvdan.cc'
 

@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -19,7 +20,21 @@ import (
 
 func TestMain(m *testing.M) {
 	os.Exit(testscript.RunMain(m, map[string]func() int{
-		"bitw": main1,
+		"bitw": func() int {
+			stderr := new(bytes.Buffer)
+			code := main1(stderr)
+			s := stderr.String()
+			fmt.Fprint(os.Stderr, s)
+			// If we get a 429, succeed and write a special empty
+			// file, so that the test can be skipped.
+			if strings.Contains(s, "Too Many Requests:") {
+				if err := ioutil.WriteFile("toomany", nil, 0600); err != nil {
+					fmt.Println(err)
+				}
+				return 0
+			}
+			return code
+		},
 		"waitfile": func() int {
 		Files:
 			for _, path := range os.Args[1:] {
@@ -49,6 +64,30 @@ func TestMain(m *testing.M) {
 			}
 			fmt.Printf("timed out waiting for %q\n", os.Args[1:])
 			return 1
+		},
+		"2fa": func() int {
+			key := os.Args[1]
+			dst := os.Args[2]
+			// TODO: don't require rsc.io/2fa
+			cmd := exec.Command("2fa", "-add", "tmp")
+			cmd.Stdin = strings.NewReader(key + "\n")
+			if out, err := cmd.CombinedOutput(); err != nil {
+				fmt.Println(string(out))
+				fmt.Println(err)
+				return 1
+			}
+			cmd = exec.Command("2fa", "-clip", "tmp")
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				fmt.Println(string(out))
+				fmt.Println(err)
+				return 1
+			}
+			if err := ioutil.WriteFile(dst, out, 0600); err != nil {
+				fmt.Println(err)
+				return 1
+			}
+			return 0
 		},
 	}))
 }
@@ -84,6 +123,8 @@ func TestScripts(t *testing.T) {
 			// Secrets should pass through.
 			for _, name := range [...]string{
 				"PASSWORD_NOTFA",
+				"PASSWORD_WITHTFA",
+				"TFAKEY",
 			} {
 				env.Vars = append(env.Vars, name+"="+os.Getenv(name))
 			}
@@ -102,6 +143,10 @@ func TestScripts(t *testing.T) {
 		Condition: func(cond string) (bool, error) {
 			if strings.HasPrefix(cond, "env:") {
 				return os.Getenv(cond[4:]) != "", nil
+			}
+			if strings.HasPrefix(cond, "file:") {
+				_, err := os.Lstat(cond[5:])
+				return err == nil, nil
 			}
 			switch cond {
 			case "write":
