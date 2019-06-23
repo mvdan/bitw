@@ -47,7 +47,8 @@ func serveDBus(ctx context.Context) error {
 	}
 
 	srv := &dbusService{}
-	conn.Export(srv, objPrefix, "org.freedesktop.Secret.Service")
+	conn.ExportSubtree(srv, objPrefix, "org.freedesktop.Secret.Service")
+	conn.ExportSubtree(srv, objPrefix, "org.freedesktop.DBus.Properties")
 
 	reply, err := conn.RequestName(dbusName, dbus.NameFlagDoNotQueue)
 	if err != nil {
@@ -91,6 +92,16 @@ Ciphers:
 	return
 }
 
+func (d *dbusService) secretByPath(item dbus.ObjectPath) (Cipher, bool) {
+	id := path.Base(string(item))
+	for _, cipher := range data.Sync.Ciphers {
+		if dbusID(cipher.ID) == id {
+			return cipher, true
+		}
+	}
+	return Cipher{}, false
+}
+
 func dbusID(id string) string {
 	return strings.Replace(id, "-", "", -1)
 }
@@ -102,22 +113,40 @@ type dbusSecret struct {
 	ContentType string
 }
 
+func (d *dbusService) GetAll(msg dbus.Message, iface string) (map[string]dbus.Variant, *dbus.Error) {
+	props := make(map[string]dbus.Variant)
+	item := msg.Headers[dbus.FieldPath].Value().(dbus.ObjectPath)
+	switch iface {
+	case "org.freedesktop.Secret.Item":
+		props["Locked"] = dbus.MakeVariant(false)
+		props["Attributes"] = dbus.MakeVariant(map[string]string{})
+		cipher, ok := d.secretByPath(item)
+		if !ok {
+			return nil, errNoSuchObject
+		}
+		name, err := decryptStr(cipher.Name)
+		if err != nil {
+			return nil, dbusErrorf("%s", err)
+		}
+		props["Label"] = dbus.MakeVariant(name)
+		props["Created"] = dbus.MakeVariant(uint64(cipher.RevisionDate.Unix()))
+		props["Modified"] = dbus.MakeVariant(uint64(cipher.RevisionDate.Unix()))
+	// case "org.freedesktop.Secret.Collection":
+	// case "org.freedesktop.Secret.Service":
+	default:
+		return nil, errNotSupported
+	}
+	return props, nil
+}
+
 func (d *dbusService) GetSecrets(items []dbus.ObjectPath, session dbus.ObjectPath) (secrets map[dbus.ObjectPath]dbusSecret, _ *dbus.Error) {
 	secrets = make(map[dbus.ObjectPath]dbusSecret)
 	for _, item := range items {
-		id := path.Base(string(item))
-
-		var found Cipher
-		for _, cipher := range data.Sync.Ciphers {
-			if dbusID(cipher.ID) == id {
-				found = cipher
-				break
-			}
-		}
-		if found.ID == "" {
+		cipher, ok := d.secretByPath(item)
+		if !ok {
 			return nil, errNoSuchObject
 		}
-		password, err := decrypt(found.Login.Password)
+		password, err := decrypt(cipher.Login.Password)
 		if err != nil {
 			return nil, dbusErrorf("%s", err)
 		}

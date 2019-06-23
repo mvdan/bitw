@@ -38,6 +38,7 @@ stdout 'password1'
 
 # Search for secrets.
 
-# TODO: fix this
-# exec secret-tool search name login1
-# stdout 'password1'
+exec secret-tool search name login1
+stdout 'label = login1'
+stdout 'modified = 2019-'
+stdout 'secret = password1'
