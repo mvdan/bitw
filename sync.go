@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -74,7 +73,7 @@ type Cipher struct {
 func (c *Cipher) Match(attr, value string) bool {
 	got := ""
 	var err error
-	switch strings.ToLower(attr) {
+	switch attr {
 	case "id":
 		got = c.ID
 	case "name":
@@ -84,6 +83,7 @@ func (c *Cipher) Match(attr, value string) bool {
 	}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not decrypt %s: %v", attr, err)
+		return false
 	}
 	return got == value
 }

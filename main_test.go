@@ -23,7 +23,6 @@ func TestMain(m *testing.M) {
 		"waitfile": func() int {
 		Files:
 			for _, path := range os.Args[1:] {
-				fmt.Println(path[1:])
 				for i := 0; i < 10; i++ {
 					if _, err := os.Lstat(path); err == nil {
 						continue Files

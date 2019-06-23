@@ -32,6 +32,10 @@ stdout 'password1'
 ! exec secret-tool lookup id missing
 ! stdout .
 
+# Attributes are case-sensitive.
+! exec secret-tool lookup ID e774c52d-aebb-4c40-aae7-aa6d00f13011
+! exec secret-tool lookup Name login1
+
 # Search for secrets.
 
 # TODO: fix this
