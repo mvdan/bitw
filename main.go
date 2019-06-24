@@ -351,6 +351,9 @@ func decryptStr(cipherStr string) (string, error) {
 }
 
 func decrypt(cipherStr string) ([]byte, error) {
+	if cipherStr == "" {
+		return nil, nil
+	}
 	if err := ensureDecryptKey(); err != nil {
 		return nil, err
 	}
