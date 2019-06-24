@@ -94,7 +94,7 @@ func login(ctx context.Context) error {
 			return fmt.Errorf("expected one two-factor auth provider, found %d", n)
 		}
 		provider := twoFactor.TwoFactorProviders[0]
-		tfaToken, err := prompt("Six-digit Two-factor auth token")
+		tfaToken, err := prompt("Six-digit two-factor auth token")
 		if err != nil {
 			return err
 		}

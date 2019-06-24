@@ -14,7 +14,7 @@ Note that this tool is still a work in progress.
 
 #### Quickstart
 
-Log in and sync, providin a password when asked:
+Log in and sync, providing a password when asked:
 
 	export EMAIL=you@domain.com
 	bitw sync
