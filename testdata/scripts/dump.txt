@@ -15,6 +15,7 @@ bitw dump
 
 stdout 'login1'
 stdout 'domain1\.com'
+stdout 'username1'
 stdout 'password1'
 
 stdout 'justpassword'

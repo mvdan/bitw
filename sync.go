@@ -78,6 +78,8 @@ func (c *Cipher) Match(attr, value string) bool {
 		got = c.ID
 	case "name":
 		got, err = decryptStr(c.Name)
+	case "username":
+		got, err = decryptStr(c.Login.Username)
 	default:
 		return false
 	}

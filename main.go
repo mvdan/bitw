@@ -272,11 +272,15 @@ func run(args ...string) (err error) {
 			if err != nil {
 				return err
 			}
+			user, err := decrypt(cipher.Login.Username)
+			if err != nil {
+				return err
+			}
 			pw, err := decrypt(cipher.Login.Password)
 			if err != nil {
 				return err
 			}
-			fmt.Printf("%s\t%s\t%s\t%s\n", cipher.ID, name, uri, pw)
+			fmt.Printf("%s\t%s\t%s\t%s\t%s\n", cipher.ID, name, uri, user, pw)
 		}
 	case "serve":
 		if err := serveDBus(ctx); err != nil {
