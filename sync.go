@@ -62,7 +62,7 @@ type Cipher struct {
 	CollectionIDs       []string
 
 	Card       string
-	Fields     []string
+	Fields     []Field
 	Identity   string
 	Login      Login
 	Name       string
@@ -86,6 +86,12 @@ func (c *Cipher) Match(attr, value string) bool {
 		return false
 	}
 	return got == value
+}
+
+type Field struct {
+	Type  int
+	Name  string
+	Value string
 }
 
 type Login struct {

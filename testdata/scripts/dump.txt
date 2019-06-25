@@ -12,6 +12,11 @@ stderr 'need a terminal to prompt'
 env PASSWORD=$PASSWORD_NOTFA
 
 bitw dump
+
 stdout 'login1'
 stdout 'domain1\.com'
 stdout 'password1'
+
+stdout 'justpassword'
+
+stdout 'allfields'
