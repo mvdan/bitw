@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/google/uuid"
@@ -134,6 +135,9 @@ func prompt(line string) ([]byte, error) {
 		fmt.Printf("%s: ", line)
 		password, err := terminal.ReadPassword(fd)
 		fmt.Println()
+		if err == nil && len(password) == 0 {
+			err = io.ErrUnexpectedEOF
+		}
 		return password, err
 	case os.Getenv("FORCE_STDIN_PROMPTS") == "true":
 		return readLine(os.Stdin)
@@ -263,25 +267,24 @@ func run(args ...string) (err error) {
 			return err
 		}
 	case "dump":
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.AlignRight)
+		fmt.Fprintln(w, "name\turi\tusername\tpassword\t")
 		for _, cipher := range data.Sync.Ciphers {
-			name, err := decrypt(cipher.Name)
-			if err != nil {
-				return err
+			for _, cipherStr := range [...]string{
+				cipher.Name,
+				cipher.Login.URI,
+				cipher.Login.Username,
+				cipher.Login.Password,
+			} {
+				s, err := decrypt(cipherStr)
+				if err != nil {
+					return err
+				}
+				fmt.Fprintf(w, "%s\t", s)
 			}
-			uri, err := decrypt(cipher.Login.URI)
-			if err != nil {
-				return err
-			}
-			user, err := decrypt(cipher.Login.Username)
-			if err != nil {
-				return err
-			}
-			pw, err := decrypt(cipher.Login.Password)
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%s\t%s\t%s\t%s\t%s\n", cipher.ID, name, uri, user, pw)
+			fmt.Fprintln(w)
 		}
+		w.Flush()
 	case "serve":
 		if err := serveDBus(ctx); err != nil {
 			return err

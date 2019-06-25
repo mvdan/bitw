@@ -12,12 +12,10 @@ stderr 'need a terminal to prompt'
 env PASSWORD=$PASSWORD_NOTFA
 
 bitw dump
+cmp stdout stdout.golden
 
-stdout 'login1'
-stdout 'domain1\.com'
-stdout 'username1'
-stdout 'password1'
-
-stdout 'justpassword'
-
-stdout 'allfields'
+-- stdout.golden --
+         name         uri  username       password
+       login1 domain1.com username1      password1
+ justpassword                       singlepassword
+    allfields        url1  username       password
