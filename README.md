@@ -33,8 +33,7 @@ You can also start the D-Bus service, and use it:
 These features are not planned at the moment:
 
 * A graphical interface - use `vault.bitwarden.com`
-* Modifying and importing secrets - use `vault.bitwarden.com`
-* Querying secrets - use D-Bus clients like `secret-tool`
+* Querying secrets directly - use D-Bus clients like `secret-tool`
 * Integration with gnome-keyring - they both implement the same D-Bus service
 
 #### Further reading
