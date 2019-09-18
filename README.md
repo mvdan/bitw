@@ -1,7 +1,5 @@
 # bitw
 
-[![CircleCI](https://circleci.com/gh/mvdan/bitw.svg?style=svg)](https://circleci.com/gh/mvdan/bitw)
-
 A simple BitWarden client. Requires Go 1.12 or later.
 
 	cd $(mktemp -d); go mod init tmp; go get mvdan.cc/bitw

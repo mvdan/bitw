@@ -1,0 +1,30 @@
+on: [push, pull_request]
+name: Test
+jobs:
+  test:
+    strategy:
+      matrix:
+        # Test on fewer Go versions to avoid bitwarden.com rate limits.
+        # go-version: [1.12.x, 1.13.x]
+        go-version: [1.13.x]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v1
+
+    - name: Install Linux deps
+      if: matrix.platform == 'ubuntu-latest'
+      run: sudo apt update && sudo apt install -y --no-install-recommends dbus libsecret-tools
+    - name: Install portable deps
+      run: go install rsc.io/2fa
+
+    - name: Test
+      run: go test -v ./...
+      env:
+        PASSWORD_NOTFA: ${{ secrets.PASSWORD_NOTFA }}
+        PASSWORD_WITHTFA: ${{ secrets.PASSWORD_WITHTFA }}
