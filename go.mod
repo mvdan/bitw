@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/atotto/clipboard v0.1.2 // indirect
-	github.com/godbus/dbus v5.0.1+incompatible
+	github.com/godbus/dbus/v5 v5.0.3
 	github.com/google/uuid v1.1.1
 	github.com/knq/ini v0.0.0-20181118015158-a301e724bd35
 	github.com/rogpeppe/go-internal v1.3.2
