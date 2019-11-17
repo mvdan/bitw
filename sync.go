@@ -50,23 +50,23 @@ type GlobalEquivalentDomains struct {
 }
 
 type Cipher struct {
-	Type                int
-	FolderID            string
-	OrganizationID      string
-	Favorite            bool
-	Edit                bool
-	ID                  string
-	Attachments         []string
+	Type           int
+	FolderID       string
+	OrganizationID string
+	Favorite       bool
+	Edit           bool
+	ID             string
+	// Attachments TODO
 	OrganizationUseTotp bool
 	RevisionDate        time.Time
 	CollectionIDs       []string
 
-	Card       string
-	Fields     []Field
-	Identity   string
-	Login      Login
-	Name       string
-	Notes      string
+	// Card TODO
+	Fields []Field
+	// Identity TODO
+	Login Login
+	Name  string
+	// Notes TODO
 	SecureNote SecureNote
 }
 
