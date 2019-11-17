@@ -34,7 +34,15 @@ func objPath(suffix string) dbus.ObjectPath {
 }
 
 func serveDBus(ctx context.Context) error {
-	conn, err := dbus.SessionBusPrivate()
+	conn, err := dbus.SessionBusPrivate(
+	// TODO: expose this via a serve flag
+	// dbus.WithIncomingInterceptor(func(msg *dbus.Message) {
+	// 	fmt.Println("in:", msg)
+	// }),
+	// dbus.WithOutgoingInterceptor(func(msg *dbus.Message) {
+	// 	fmt.Println("out:", msg)
+	// }),
+	)
 	if err != nil {
 		return err
 	}
@@ -48,6 +56,7 @@ func serveDBus(ctx context.Context) error {
 
 	srv := &dbusService{}
 	conn.ExportSubtree(srv, objPrefix, "org.freedesktop.Secret.Service")
+	conn.ExportSubtree(srv, objPrefix, "org.freedesktop.Secret.Item")
 	conn.ExportSubtree(srv, objPrefix, "org.freedesktop.DBus.Properties")
 
 	reply, err := conn.RequestName(dbusName, dbus.NameFlagDoNotQueue)
@@ -141,6 +150,23 @@ func (d *dbusService) GetAll(msg dbus.Message, iface string) (map[string]dbus.Va
 		return nil, errNotSupported
 	}
 	return props, nil
+}
+
+func (d *dbusService) GetSecret(msg dbus.Message, session dbus.ObjectPath) (secret dbusSecret, _ *dbus.Error) {
+	item := msg.Headers[dbus.FieldPath].Value().(dbus.ObjectPath)
+	cipher, ok := d.secretByPath(item)
+	if !ok {
+		return secret, errNoSuchObject
+	}
+	password, err := decrypt(cipher.Login.Password)
+	if err != nil {
+		return secret, dbusErrorf("%s", err)
+	}
+	return dbusSecret{
+		Session:     session,
+		Value:       password,
+		ContentType: "text/plain",
+	}, nil
 }
 
 func (d *dbusService) GetSecrets(items []dbus.ObjectPath, session dbus.ObjectPath) (secrets map[dbus.ObjectPath]dbusSecret, _ *dbus.Error) {
