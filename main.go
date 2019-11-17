@@ -207,7 +207,7 @@ func run(args ...string) (err error) {
 	}
 	dir := os.Getenv("CONFIG_DIR")
 	if dir == "" {
-		if dir, err = userConfigDir(); err != nil {
+		if dir, err = os.UserConfigDir(); err != nil {
 			return err
 		}
 		dir = filepath.Join(dir, "bitw")
