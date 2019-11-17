@@ -28,3 +28,4 @@ jobs:
       env:
         PASSWORD_NOTFA: ${{ secrets.PASSWORD_NOTFA }}
         PASSWORD_WITHTFA: ${{ secrets.PASSWORD_WITHTFA }}
+        TFAKEY: ${{ secrets.TFAKEY }}
