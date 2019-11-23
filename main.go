@@ -17,7 +17,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -360,7 +359,7 @@ func decryptStr(s CipherString) (string, error) {
 // TODO: turn this into a method
 
 func decrypt(s CipherString) ([]byte, error) {
-	if s == "" {
+	if s.Type == 0 {
 		return nil, nil
 	}
 	if err := ensureDecryptKey(); err != nil {
@@ -371,68 +370,32 @@ func decrypt(s CipherString) ([]byte, error) {
 		return nil, err
 	}
 
-	typ, iv, ct, mac, err := parseCipher(s)
-	if err != nil {
-		return nil, err
-	}
-	switch typ {
+	switch s.Type {
 	case 2:
 		// AES-CBC-256, HMAC-SHA256, base-64; continues below
 	default:
-		return nil, fmt.Errorf("unsupported cipher type %q", typ)
+		return nil, fmt.Errorf("unsupported cipher type %q", s.Type)
 	}
 
 	if macKey != nil {
 		var msg []byte
-		msg = append(msg, iv...)
-		msg = append(msg, ct...)
-		if !validMAC(msg, mac, macKey) {
+		msg = append(msg, s.IV...)
+		msg = append(msg, s.CT...)
+		if !validMAC(msg, s.MAC, macKey) {
 			return nil, fmt.Errorf("MAC mismatch")
 		}
 	}
 
-	decrypter := cipher.NewCBCDecrypter(c, iv)
-	decrypter.CryptBlocks(ct, ct)
-	ct = unpad(ct)
-	return ct, nil
+	decrypter := cipher.NewCBCDecrypter(c, s.IV)
+	dst := make([]byte, len(s.CT))
+	decrypter.CryptBlocks(dst, s.CT)
+	dst = unpad(dst)
+	return dst, nil
 }
 
 func unpad(src []byte) []byte {
 	n := src[len(src)-1]
 	return src[:len(src)-int(n)]
-}
-
-func parseCipher(cs CipherString) (typ int, iv, ct, mac []byte, err error) {
-	s := string(cs)
-	i := strings.IndexByte(s, '.')
-	if i < 0 {
-		return 0, nil, nil, nil, fmt.Errorf("invalid cipher string %q", s)
-	}
-	typStr := s[:i]
-	typ, err = strconv.Atoi(typStr)
-	if err != nil {
-		return 0, nil, nil, nil, fmt.Errorf("invalid cipher type %q", typStr)
-	}
-	s = s[i+1:]
-
-	parts := strings.Split(s, "|")
-	if len(parts) != 3 {
-		return 0, nil, nil, nil, fmt.Errorf("invalid cipher string %q", s)
-	}
-
-	iv, err = b64enc.DecodeString(parts[0])
-	if err != nil {
-		return 0, nil, nil, nil, err
-	}
-	ct, err = b64enc.DecodeString(parts[1])
-	if err != nil {
-		return 0, nil, nil, nil, err
-	}
-	mac, err = b64enc.DecodeString(parts[2])
-	if err != nil {
-		return 0, nil, nil, nil, err
-	}
-	return typ, iv, ct, mac, err
 }
 
 func validMAC(message, messageMAC, key []byte) bool {

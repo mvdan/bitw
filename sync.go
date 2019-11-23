@@ -4,9 +4,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +21,65 @@ type SyncData struct {
 	Domains Domains
 }
 
-type CipherString string
+type CipherString struct {
+	Type int
+
+	IV, CT, MAC []byte
+}
+
+func (s CipherString) MarshalText() ([]byte, error) {
+	if s.Type == 0 {
+		return nil, nil
+	}
+	return []byte(fmt.Sprintf("%d.%s|%s|%s",
+		s.Type,
+		b64enc.EncodeToString(s.IV),
+		b64enc.EncodeToString(s.CT),
+		b64enc.EncodeToString(s.MAC),
+	)), nil
+}
+
+func (s *CipherString) UnmarshalText(data []byte) error {
+	if len(data) == 0 {
+		return nil
+	}
+	i := bytes.IndexByte(data, '.')
+	if i < 0 {
+		return fmt.Errorf("invalid cipher string %q", data)
+	}
+	typStr := string(data[:i])
+	var err error
+	if s.Type, err = strconv.Atoi(typStr); err != nil {
+		return fmt.Errorf("invalid cipher type %q", typStr)
+	}
+	data = data[i+1:]
+
+	parts := bytes.Split(data, []byte("|"))
+	if len(parts) != 3 {
+		return fmt.Errorf("invalid cipher string %q", data)
+	}
+	// TODO: do a single []byte allocation for all three
+	if s.IV, err = b64decode(parts[0]); err != nil {
+		return err
+	}
+	if s.CT, err = b64decode(parts[1]); err != nil {
+		return err
+	}
+	if s.MAC, err = b64decode(parts[2]); err != nil {
+		return err
+	}
+	return nil
+}
+
+func b64decode(src []byte) ([]byte, error) {
+	dst := make([]byte, b64enc.DecodedLen(len(src)))
+	n, err := b64enc.Decode(dst, src)
+	if err != nil {
+		return nil, err
+	}
+	dst = dst[:n]
+	return dst, nil
+}
 
 type Profile struct {
 	ID                 uuid.UUID
