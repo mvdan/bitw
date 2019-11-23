@@ -1,39 +1,31 @@
 {
 	"DeviceID": "cfd6811f-7f66-4393-bbdf-4d509ae4904b",
-	"AccessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkJDMzZDMjE0REI0OEYyMzVCNzdEQTNGMTcyMEMxQTM1QTk2MkVBNDMiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJ2RGJDRk50SThqVzNmYVB4Y2d3YU5hbGk2a00ifQ.eyJuYmYiOjE1NzQ1MjA2MDMsImV4cCI6MTU3NDYwNzAwMywiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS5iaXR3YXJkZW4uY29tIiwiYXVkIjpbImh0dHBzOi8vaWRlbnRpdHkuYml0d2FyZGVuLmNvbS9yZXNvdXJjZXMiLCJhcGkiXSwiY2xpZW50X2lkIjoiY29ubmVjdG9yIiwic3ViIjoiNjZiNTQzNTItZDMxMS00ODY2LTkwY2ItYWE2ZDAwZDYyZjNiIiwiYXV0aF90aW1lIjoxNTc0NTIwNjAzLCJpZHAiOiJiaXR3YXJkZW4iLCJwcmVtaXVtIjpmYWxzZSwiZW1haWwiOiJ0ZXN0bm90ZmFAbXZkYW4uY2MiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwic3N0YW1wIjoiRUFDWldRTEZaQUw2WFZZQzcyRVZJUUNWRFNOSU8yMlEiLCJuYW1lIjoiVGVzdCBXaXRob3V0IFRGQSIsImRldmljZSI6ImNmZDY4MTFmLTdmNjYtNDM5My1iYmRmLTRkNTA5YWU0OTA0YiIsInNjb3BlIjpbImFwaSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJBcHBsaWNhdGlvbiJdfQ.W80bvQ6pStW0_hVK2vDY2NYmTdRp9zNM93gJoduCXdvMbMlIU1YXJnq-vlURd8MBfrMQ_t81nQSZN5AIdfCKtnQT0QLPHNZrGT-VOgSjmFNB_kze_c78ZPko2_3jELVGj6reKKnXVe1-5ibel7FOY_BMNaMsnnpWhsCxRADbZOv-nDshOX50Z91y9gik_RyWAHiC9ihVih0a3vwKJL4rYaZA0Q-O8u7F-u8MCb6j6B0mRG0QDbXF0u21gYFUogNyEhvND9Gyxo-o2NK0xLyAzL2oCrMkSRKQOLkFvMleC2qvQFK4Sa7vYXDKZx1s-Vrskkn7UXmvGpxxGPxtX-mmqy2R03JRVfDBPhEEHN_bMgvI0PtIRCHdqtN9BnfRE4d3Sdj8UdtvTYr0DIFZoIG15kvkpZVhMwzFYIJwtMKzXpSRvoinzPX9XYxGJ6myqvo4B1lOCfO-k4f7pGwHeggeu88UqZ9Mp1-JQV10SGEU7E-NN0V3HHcQQl9zleelrBH6zy3R9KupS-BlqEh0gYLwwihcNuWSius6jWUUSHyAOW3o6w1n6i7C79V51ZacK6laAER1vjCtn_yEms1z8Kk0tbje5TPklLCs2TGyb7I_L2rLtJ-cHqQIemhvMz5KqqjDwWuBoJmAC9vBUv11MI8vHZfy9zPXDJYm3Ha6IHH3zAo",
-	"RefreshToken": "44a0f55254d0666cc59e83369bad7ec92de7b0a8105e63da36d6867e4564a06e",
-	"TokenExpiry": "2019-11-24T14:50:03.457744778Z",
+	"AccessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkJDMzZDMjE0REI0OEYyMzVCNzdEQTNGMTcyMEMxQTM1QTk2MkVBNDMiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJ2RGJDRk50SThqVzNmYVB4Y2d3YU5hbGk2a00ifQ.eyJuYmYiOjE1NzQ1MjI0OTQsImV4cCI6MTU3NDYwODg5NCwiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS5iaXR3YXJkZW4uY29tIiwiYXVkIjpbImh0dHBzOi8vaWRlbnRpdHkuYml0d2FyZGVuLmNvbS9yZXNvdXJjZXMiLCJhcGkiXSwiY2xpZW50X2lkIjoiY29ubmVjdG9yIiwic3ViIjoiNjZiNTQzNTItZDMxMS00ODY2LTkwY2ItYWE2ZDAwZDYyZjNiIiwiYXV0aF90aW1lIjoxNTc0NTIyNDk0LCJpZHAiOiJiaXR3YXJkZW4iLCJwcmVtaXVtIjpmYWxzZSwiZW1haWwiOiJ0ZXN0bm90ZmFAbXZkYW4uY2MiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwic3N0YW1wIjoiRUFDWldRTEZaQUw2WFZZQzcyRVZJUUNWRFNOSU8yMlEiLCJuYW1lIjoiVGVzdCBXaXRob3V0IFRGQSIsImRldmljZSI6ImNmZDY4MTFmLTdmNjYtNDM5My1iYmRmLTRkNTA5YWU0OTA0YiIsInNjb3BlIjpbImFwaSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJBcHBsaWNhdGlvbiJdfQ.kBVJYe1ySVySxxdvziTeqVJ6fS4tfffCXaZlZEKQzjrEwy9vg-X-KZxT7Ft2uk0V1IqkFc0AfcL0Bbc8nZ_bGnN3PCX0ZHCjvnNxbz6lAT_7ArCfScBprnqPtq58sP0uvpHMMJATnxPNiL1B0olbQgPcM-Fyx4Qx1qBXR8hCUeXeadU8wcCWHwla5kZcZR4cyiaAbq2q0hAcTn_HrklX0x-YUS0KQ_oPMVvyW8cPQG-IeNhvL_yKCt0lh1eL3ltmIy0pzfaAySMp9tH7nMlGOM5oylmmhVPUPzCsr4K9MXcaLPZJMoBurcWMpDWVYWEP9IgLbI6nqqe9vbOrEHsWQ2NQp_2flpbgKpxsjPF5MOmGjQGedVi2OBviiUfaQOJ3U6foF4FyAK3iMjjIPMJIhpHCDIPqZ7CIsCjOmAcPKIZ6YwFcdRhP1JsJBbrOrErtftcGZ0D6A5uS7CS4sDN2nKOffZ4tpW0Jf1pFjrspbjVKU6kwVK_tZncNaucPnitClGWthYgfmhBff3AYmFRQJOeN_e5QoNDbF013lgySVvYKMLElvTmNrVvfj1oKcGqhEqq4WnU6wPJEH_Bxkuu99UbkBoZiWSqOixh2caje6VsdIaDZ9rIjikyO22XLUlJLYv_Gw3smegrUrmqo6jHGmDUSrCWDr05F5H1RlY5dLBI",
+	"RefreshToken": "789e05ee0a2939facedb37ef7b109ee1f35c0dbcda9c792869f19c224e1572df",
+	"TokenExpiry": "2019-11-24T15:21:34.271942301Z",
 	"KDF": 0,
 	"KDFIterations": 100000,
-	"LastSync": "2019-11-23T14:50:03.969701671Z",
+	"LastSync": "2019-11-23T15:21:34.823648697Z",
 	"Sync": {
 		"Profile": {
 			"ID": "66b54352-d311-4866-90cb-aa6d00d62f3b",
 			"Name": "Test Without TFA",
 			"Email": "testnotfa@mvdan.cc",
 			"EmailVerified": true,
-			"Premium": false,
 			"MasterPasswordHint": "spelled, four alt numbers",
 			"Culture": "en-US",
-			"TwoFactorEnabled": false,
 			"Key": "2.lbOw26w1a0GINKkT2YAf+g==|a4NLBjU/yZhD2yAMG5f1p0aDuLVKZ5dErQZHFxP4HPLA9039hzOs2Si0FfaFN4dnUWf5FwmAml1WeO6dH5kOcL0bXm1E2T0tkNyrtQHwnpk=|3k3Os0LCQw1ekU6ZCCfUI/9ubMibVU4rGERyvKuFy1s=",
 			"PrivateKey": "2.bkIIb5bUGazvNHoA05Nrxw==|LclXYQwigrMxzTfq/kY5bNY+fE4IiumMC2H3H5R7UkDPxo1w2jaV31xSYRhpP0nkjs/eOKQhMl0nG/g6Q45QB32hItLxL+vMd4vzSz+xP6BcxGw7lCOUPtLqlBD0WycLnlMIZwj/6AxxCNgB+fcUgUWXgUQ6BLfytNT/nqsW3qiyIfYblUv4z1EvsJMPG0iGOuhggN9eWSHsv6vAodsITh4l6OszXnXUBBAPrvrT4ZakEfU7YiztLd6mycdvNDvS9SqTFfr14DpyM42qtgvsCykkWwa9tKAsfdxdSuEjrAA6DbBzEI1Zl3h0dN6RHMCn5WiYxOvVY0HZDwLh6oi0yDAud99mz/9yvlqZr0MxbcXhXjs9f3YKzm+1j2hkwx65PAibH7+np0Kew5FeQcgPUIYmO7ezWv1QDux15V6HwY0t7tlL0N+0d8XPL4YMOPT1d0PI/7Inrmi3nZRffBotE4cx80nb83jE6BnAKst7yD7Fi2LHcQapnnoQQmVccHxIcAIQyXqHghGJTt0EFoIuF0Vsj+AxV8JMxUszuz3jEatYo0k/wZkkD++D2xExIzZ6slfVfyPH5L/xCAeFxJshn0n63JErafWYvW065pkCPgtLVC5vPWd+dG9pLqviK+aHjxKXejdzOB/IWenHeUvpG5HOLwrzDqdREbJdwkCIvmLR5CRTQQq4KhtfYG1/v12XS/ckpF+lX/Fh/reiAm47YDCD10EWFArnqTJFtYa0TJURwlmmpvomIRavZaST+IG1GJvJ4QFX2wf7JC/c8Nby/BGRMC8T5GrP8knqK+FS7K3o61zFEedKPoOuSn4WPAaTN5tS3qe9tJEo+p81hxWJwcQhnKBbRI9jKRUiDE9PwfMcXILFf/csghqlrjiZBTRO7659JpqBuXj1+kUzHVvNrBfRJUr9pt1lMhZgMNDF0inz3+BmsGvW7OH/pR4J6P+sH7kmg3KjL9zozvdl6l9Rv4J0Hjpjo0SUa8JlMUDs294bWAlaBgpMDU/U2O0r/LxeItPo1q24RO1NFVnELCJ2ucpPYxIUVvtKOwCFpZAlS5PI+zvbwpqsC34UgWmP8B22yFYmXmK+6j+LURKhYBFXkY/VdoIQrwG071YXZJuh/yjhTBnRM58GZ69KqIdDDcEqXTIYJ8Bu2kshHyZ/gS7jZlqao1+a6VpC1IWfM8MKeRuGndWBOXs8p4/TWREudVZrb+qDmdkw6HcaGatjbF1BI6fASBETEQEMLo/HmU/RPuFjbLAXuylHDXrrVXIeGwbSdwrcDlPpyO/87z79ONXioTua6aqqATdrczWteFSEmDhcMZsipYXDxkI3Dvz10dvEzYNaeRwh74bCF7jPvzrIldOEGzpLXNxEHDOqKPUKd5poKS3QaDtnl+jbvfYlFFbVJV0V1pnTHe8qycIyOWyRO4ptzG9jbp4y9GEaGdgx5HdDDW1m4Rq4uMx4OXRj7HVn/RrXnKRhDNYUkXLEy5aYF4DVsWPB7MHoYTpyoB8D4HtGsOGdQm+fno96afrbJH8NnAjJzNkq47UxgP+Q6hgXM4cIrfu8lmMZuayzLLXTHs5Ez+6JIZJuU//B9XU08591XoZ76wt7frh92GUHRdsddoRMa4bD/t26Hn2cWjFCMoM=|gwvo3FZ43g7hB3BV4Q14bASKNm/oqe4zyzKQ/Z+KfY8=",
-			"SecurityStamp": "EACZWQLFZAL6XVYC72EVIQCVDSNIO22Q",
-			"Organizations": []
+			"SecurityStamp": "EACZWQLFZAL6XVYC72EVIQCVDSNIO22Q"
 		},
-		"Folders": [],
 		"Ciphers": [
 			{
 				"Type": 1,
-				"FolderID": "",
-				"OrganizationID": "",
-				"Favorite": false,
 				"Edit": true,
 				"ID": "e774c52d-aebb-4c40-aae7-aa6d00f13011",
-				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-06-15T14:38:08.2666667Z",
-				"CollectionIDs": [],
-				"Fields": null,
+				"Card": {},
+				"Identity": {},
 				"Login": {
 					"Password": "2.vJw50ZK539wgS5bBGBbFhQ==|2Ot7gsdzT4JQ2Eil3tIq6w==|qEpYEmLuYDwFG1ICWfuPXEMyUt5Trek2nIeqPcdv/jA=",
 					"Totp": "",
@@ -53,15 +45,11 @@
 			},
 			{
 				"Type": 1,
-				"FolderID": "",
-				"OrganizationID": "",
-				"Favorite": false,
 				"Edit": true,
 				"ID": "55626dc4-7c07-4506-9eaf-aa76009892d4",
-				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-06-24T09:15:30.1966667Z",
-				"CollectionIDs": [],
-				"Fields": null,
+				"Card": {},
+				"Identity": {},
 				"Login": {
 					"Password": "2.Xt7QiBtz4U9i4B4La/vahA==|oEctJAIwsrxtPCSSsoAO7g==|tnVGxFb5CBnfJBVMtb7xoGVDub3w3CBhcl7Nj4iDHz8=",
 					"Totp": "",
@@ -76,14 +64,10 @@
 			},
 			{
 				"Type": 1,
-				"FolderID": "",
-				"OrganizationID": "",
-				"Favorite": false,
 				"Edit": true,
 				"ID": "a389bbb8-3084-4c81-8da3-aa770093ddef",
-				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-06-25T08:58:22.02Z",
-				"CollectionIDs": [],
+				"Card": {},
 				"Fields": [
 					{
 						"Type": 0,
@@ -101,6 +85,7 @@
 						"Value": "2.0sq9ED3FaU0Ecb5StQrfdQ==|fnjYdvOACh48WmVnZs8Xhw==|6BqCIzhVg3MRkMjqIoxaGUvQlXFMzh23CJCWEJWjAK8="
 					}
 				],
+				"Identity": {},
 				"Login": {
 					"Password": "2.L/MbjQnlx+okG2vyyZbxiQ==|B0lXBLlqnwaNJXTBxJn5RA==|uRoedMgMKi9oHlZjfAC3g06xRnK9aDSexwG8HmXZkmw=",
 					"Totp": "2.f3cNwdUgCyUUldtfC1d82w==|sxSLQWxYB/IulJFs5tz+9w==|+KfGc7O7DY9MiBq1/M6X519qnsBOEypPzrt/7CbL1CQ=",
@@ -118,21 +103,25 @@
 					"Username": "2.iHzprFGKe8sIe+dRCVlEAg==|4w5/OU5Yv8pqzRBzTcdFgg==|D7Hw5PL1ef7kHAg7FKKYVJH0FZpFktSvlzaiRH2fd+A="
 				},
 				"Name": "2.G76KcMuYko/MvrPNcJDOrg==|iOaLA6yYAq4r1Hzzef5jBA==|yAskzd7Y+DCLdz0VoN+KLHkzbzQo+vk/m5+QobFj0u0=",
+				"Notes": "2.klNkT2BneCf6Rxf0xEKlRw==|oFpB4ZMJ7sSDMB8NE0lB3Q==|xcEnADo7NIIX3CEyTjd0naTBTVdXOZPo/oualkRkJWI=",
 				"SecureNote": {
 					"Type": 0
 				}
 			},
 			{
 				"Type": 3,
-				"FolderID": "",
-				"OrganizationID": "",
-				"Favorite": false,
 				"Edit": true,
 				"ID": "7b34b71b-833b-4089-acad-ab0e00f39513",
-				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-11-23T14:46:51.3666667Z",
-				"CollectionIDs": [],
-				"Fields": null,
+				"Card": {
+					"CardholderName": "2.Tj1CPqkaxd+uzAxASU5ugg==|Q9gL0PV+g7THK2ECo3eUbA==|W3yBmhyDiI1rCBTgefm9n2ZOqRiXjRkSGKvLur7RQ/U=",
+					"Brand": "2.R/XSt0eNPhY5M+Etf6UFJg==|pSzVrbbseJKZ1l406BwBKQ==|5rN27I/PWBc7uIblvIvZhRdLKpRa5FTkzlh2LRXRjF4=",
+					"Number": "2.2VSBG2U734qjo0oVupoOZg==|5z5iNmxxD4JFnbZG/YUK+4AYrmnGTzTcCqD7WKkfYR0=|B9tm8702kbQLtYz2bIxOlT0U2kpZ+qoQ3b6ve8Ot2nQ=",
+					"ExpMonth": "2.8cs8y4L6JwnZJJzE7H3NQA==|Xw/mCaqcKVZyZ8IlFC4Ewg==|9oJLixcjqce1VrJmhLSsTW684EfcM8IO5lj87GqxMcE=",
+					"ExpYear": "2.Ggj8QEf5reuxQ5WIOyrLHw==|zYrZN+w+oTTPgggU6FyV5g==|nLr23X59gVcoLr/hEwTx0GaA2J53V5IN2JjPMcwM6n4=",
+					"Code": "2.tjXx42hRF00sbWhKsd3egg==|zMAZyJzREVIz2ydSiM+pXA==|CZAcaDNtSGYiVqZ19G7wx5ym3EcoZRioIYLwhD6EJ6c="
+				},
+				"Identity": {},
 				"Login": {
 					"Password": "",
 					"Totp": "",
@@ -147,15 +136,28 @@
 			},
 			{
 				"Type": 4,
-				"FolderID": "",
-				"OrganizationID": "",
-				"Favorite": false,
 				"Edit": true,
 				"ID": "f75f972a-d5e2-41db-bca8-ab0e00f4166c",
-				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-11-23T14:48:41.7433333Z",
-				"CollectionIDs": [],
-				"Fields": null,
+				"Card": {},
+				"Identity": {
+					"Title": "2.V1EUVQJP56gIZy2MDx01yA==|0pJnDDzlUlOxagbDjcGzsw==|HZWjqKJJ6lA6yHxCNKkVDGcrVuoVaho3CNZWnRT9GDc=",
+					"FirstName": "2.KrWQQozVNdvvuSvexhH25g==|GgsEiY35U+Fb0INZ7KSUGQ==|k7dLy2L2x90ryVUirPzeT6oeMGXhUt43XdLzpGVvntE=",
+					"MiddleName": "2.5B028sJD1fjYGLA6/f965g==|+WHGseU6YTrwNNOLTKs/yA==|AEhzjrAU8G5qBETbji4+wDpGRUbQkPkDYA1FYsG40Rw=",
+					"LastName": "2.nJWD/dX0PBvuTIBwTIe88w==|CGvTwg4QaV93SMQj8v6BXA==|WGC2d5tomgMeXQ06mTlp7fKp1kagM/roP5+YZCj8FOw=",
+					"Username": "2.jWaenvCB2Ci0UWAKfJCMag==|tet0nOVelPvXOe8yQN3wYA==|xxYqCXXTGfxJVopb+M//f6VdTHj4OSNFl3SCkomj+iU=",
+					"Company": "2.v+1UoFXxmCwFDOXj9hMt7A==|vjMQF0aAlUZB+gUuov6cDQ==|/iVuirsaXNCfLg1QnNH571CWvyjFMi78JoPka2oThA8=",
+					"SSN": "2.B4DWK8UXmC+KT1pwQx33+g==|UJfZwkugJWaQ+dtERuyfdw==|lhAoxH37imzCa3QQGiDT6AWuJZd2qeLIvi9oWHeEJ5I=",
+					"PassportNumber": "2.Vm1SXHeHNA49MzuP6l2N+Q==|P7CdQ/ApD4qbl7LOp1EVBg==|C6tS4aQi7nrWCOFX0fuAolkUjoLfoMCxKPgaxTIz4DA=",
+					"LicenseNumber": "2.tVCMmPZ96Ksztdudo5Apgg==|sCUD5N3QPC/1QCaV/fW3gA==|VWtMzMty7YNP1xUCCW3HMtLJaZThUx/wcBjOMIOhWlc=",
+					"Email": "2.s0J2yXUqaqBLxj/X3btCLA==|YPW3W0iYj0YjESH9dBoXSVDLZdpxFXeuwesSQrxwq+Y=|SoLeI1vplEkZEbBbjqywTomTBPT6VhWjhywva0FVCU0=",
+					"Phone": "2.Jpt0ithSxbnUAampMY/Lng==|VSPva0tXoSZ6YUcKtW8aug==|8/eZNQHguZzkRdU2njw4YW6BR4VP+Z8tZsuxpV1h6Jo=",
+					"Address1": "2./3dsgQbCb6OD5kDe4/0EeA==|NVnHNK6zbAl6EJnbD9kGxg==|hGsrniZlqgLiPf8/8qTu/zhK1KWIuZYzy504Qbmfihs=",
+					"City": "2./pl319bOf6UV/l2IsERSQg==|TC62c2mH3cKs54fWJTkZgA==|MHYfkMQp9dm7xJ8fbvRZW4YIvvNIeHzFHtBPuikX+n8=",
+					"State": "2.4evgkKMVgqBqEgrxQEOl1A==|wrO8lMUjirMLiD4A9I+OkA==|y49QrPGAzVoGH15Fb4ABKLB6WuYTkkNvNuxL+Ri6nSU=",
+					"PostalCode": "2.jPvPSDPMoZ4nvJkQSGoiRQ==|BGebqjxfsICXqejZ4DAn7Q==|jk4gzHUQllJT9/DnEb8QyUhY60WDStzrjhG/3nb2P+4=",
+					"Country": "2.hV+lHFjIwzrCPxUoIgSDkA==|dcEp0x1FWCZT2eeakXITAw==|zGL5XRaIlpBusP1BE19BfoBcKb0U/9apVDTGk84x8lI="
+				},
 				"Login": {
 					"Password": "",
 					"Totp": "",
@@ -164,21 +166,18 @@
 					"Username": ""
 				},
 				"Name": "2.wjf68OX0MD94JKVin5R5pQ==|VVZczGNLYFA3mZWKipMTMw==|QXn4bDphnWGBLDZSNvlaiMAtlRiC+TecePmrNCI0gFY=",
+				"Notes": "2.3tXh+T0SpV9g2kW5pkm6aQ==|B6+WMA3U2n92fgGvOyoMBg==|rDNfPIVp8sZIDkCZcaCNDXg8rw85LYdTOI2/dwTN2W4=",
 				"SecureNote": {
 					"Type": 0
 				}
 			},
 			{
 				"Type": 2,
-				"FolderID": "",
-				"OrganizationID": "",
-				"Favorite": false,
 				"Edit": true,
 				"ID": "8f80f479-8f2c-4074-ba61-ab0e00f428d5",
-				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-11-23T14:48:57.4533333Z",
-				"CollectionIDs": [],
-				"Fields": null,
+				"Card": {},
+				"Identity": {},
 				"Login": {
 					"Password": "",
 					"Totp": "",
@@ -187,21 +186,20 @@
 					"Username": ""
 				},
 				"Name": "2.8HWg+4ZwJwSCF7UtC/Xi0Q==|/ycuakOTv7PU/9F7NrYf1TBc4x0xAtv4HadtHyVYRh0=|Zrh67qVWWDS9PvTfOnMlXLX7T3Pbh/u1/PPT4JWj8RY=",
+				"Notes": "2.5QTxiMJjl6DTkAh1HALxeQ==|KbP1GBZIrqv43vZd/H/9rzgKJbIhnhFTB1oGezLErqE=|n+Gt1hqRPBJh0Xzcm/RsLm5xvVTCVyGSY+HKiaooMiU=",
 				"SecureNote": {
 					"Type": 0
 				}
 			}
 		],
 		"Domains": {
-			"EquivalentDomains": null,
 			"GlobalEquivalentDomains": [
 				{
 					"Type": 2,
 					"Domains": [
 						"ameritrade.com",
 						"tdameritrade.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 3,
@@ -210,8 +208,7 @@
 						"bofa.com",
 						"mbna.com",
 						"usecfo.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 4,
@@ -219,33 +216,28 @@
 						"sprint.com",
 						"sprintpcs.com",
 						"nextel.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
-					"Type": 0,
 					"Domains": [
 						"youtube.com",
 						"google.com",
 						"gmail.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 1,
 					"Domains": [
 						"apple.com",
 						"icloud.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 5,
 					"Domains": [
 						"wellsfargo.com",
 						"wf.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 6,
@@ -253,8 +245,7 @@
 						"mymerrill.com",
 						"ml.com",
 						"merrilledge.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 7,
@@ -264,8 +255,7 @@
 						"citibank.com",
 						"citicards.com",
 						"citibankonline.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 8,
@@ -277,8 +267,7 @@
 						"news.com",
 						"search.com",
 						"upload.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 9,
@@ -287,8 +276,7 @@
 						"gap.com",
 						"oldnavy.com",
 						"piperlime.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 10,
@@ -304,8 +292,7 @@
 						"office365.com",
 						"microsoftstore.com",
 						"xbox.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 11,
@@ -314,40 +301,35 @@
 						"ual.com",
 						"united.com",
 						"unitedwifi.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 12,
 					"Domains": [
 						"overture.com",
 						"yahoo.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 13,
 					"Domains": [
 						"zonealarm.com",
 						"zonelabs.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 14,
 					"Domains": [
 						"paypal.com",
 						"paypal-search.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 15,
 					"Domains": [
 						"avon.com",
 						"youravon.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 16,
@@ -363,16 +345,14 @@
 						"bookworm.com",
 						"look.com",
 						"vinemarket.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 17,
 					"Domains": [
 						"1800contacts.com",
 						"800contacts.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 18,
@@ -387,8 +367,7 @@
 						"amazon.com.au",
 						"amazon.co.nz",
 						"amazon.in"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 19,
@@ -396,40 +375,35 @@
 						"cox.com",
 						"cox.net",
 						"coxbusiness.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 20,
 					"Domains": [
 						"mynortonaccount.com",
 						"norton.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 21,
 					"Domains": [
 						"verizon.com",
 						"verizon.net"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 22,
 					"Domains": [
 						"rakuten.com",
 						"buy.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 23,
 					"Domains": [
 						"siriusxm.com",
 						"sirius.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 24,
@@ -438,8 +412,7 @@
 						"origin.com",
 						"play4free.com",
 						"tiberiumalliance.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 25,
@@ -448,8 +421,7 @@
 						"basecamp.com",
 						"basecamphq.com",
 						"highrisehq.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 26,
@@ -457,80 +429,70 @@
 						"steampowered.com",
 						"steamcommunity.com",
 						"steamgames.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 27,
 					"Domains": [
 						"chart.io",
 						"chartio.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 28,
 					"Domains": [
 						"gotomeeting.com",
 						"citrixonline.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 29,
 					"Domains": [
 						"gogoair.com",
 						"gogoinflight.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 30,
 					"Domains": [
 						"mysql.com",
 						"oracle.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 31,
 					"Domains": [
 						"discover.com",
 						"discovercard.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 32,
 					"Domains": [
 						"dcu.org",
 						"dcu-online.org"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 33,
 					"Domains": [
 						"healthcare.gov",
 						"cms.gov"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 34,
 					"Domains": [
 						"pepco.com",
 						"pepcoholdings.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 35,
 					"Domains": [
 						"century21.com",
 						"21online.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 36,
@@ -538,40 +500,35 @@
 						"comcast.com",
 						"comcast.net",
 						"xfinity.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 37,
 					"Domains": [
 						"cricketwireless.com",
 						"aiowireless.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 38,
 					"Domains": [
 						"mandtbank.com",
 						"mtb.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 39,
 					"Domains": [
 						"dropbox.com",
 						"getdropbox.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 40,
 					"Domains": [
 						"snapfish.com",
 						"snapfish.ca"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 41,
@@ -581,16 +538,14 @@
 						"aliyun.com",
 						"net.cn",
 						"www.net.cn"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 42,
 					"Domains": [
 						"playstation.com",
 						"sonyentertainmentnetwork.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 43,
@@ -600,24 +555,21 @@
 						"mercadolibre.com",
 						"mercadolibre.com.ar",
 						"mercadolibre.com.mx"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 44,
 					"Domains": [
 						"zendesk.com",
 						"zopim.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 45,
 					"Domains": [
 						"autodesk.com",
 						"tinkercad.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 46,
@@ -629,16 +581,14 @@
 						"railnation.us",
 						"trucknation.de",
 						"traviangames.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 47,
 					"Domains": [
 						"wpcu.coop",
 						"wpcuonline.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 48,
@@ -646,40 +596,35 @@
 						"mathletics.com",
 						"mathletics.com.au",
 						"mathletics.co.uk"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 49,
 					"Domains": [
 						"discountbank.co.il",
 						"telebank.co.il"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 50,
 					"Domains": [
 						"mi.com",
 						"xiaomi.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 52,
 					"Domains": [
 						"postepay.it",
 						"poste.it"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 51,
 					"Domains": [
 						"facebook.com",
 						"messenger.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 53,
@@ -687,8 +632,7 @@
 						"skysports.com",
 						"skybet.com",
 						"skyvegas.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 54,
@@ -697,80 +641,70 @@
 						"go.com",
 						"disney.com",
 						"dadt.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 55,
 					"Domains": [
 						"pokemon-gl.com",
 						"pokemon.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 56,
 					"Domains": [
 						"myuv.com",
 						"uvvu.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 58,
 					"Domains": [
 						"mdsol.com",
 						"imedidata.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 57,
 					"Domains": [
 						"bank-yahav.co.il",
 						"bankhapoalim.co.il"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 59,
 					"Domains": [
 						"sears.com",
 						"shld.net"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 60,
 					"Domains": [
 						"xiami.com",
 						"alipay.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 61,
 					"Domains": [
 						"belkin.com",
 						"seedonk.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 62,
 					"Domains": [
 						"turbotax.com",
 						"intuit.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 63,
 					"Domains": [
 						"shopify.com",
 						"myshopify.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 64,
@@ -781,32 +715,28 @@
 						"ebay.in",
 						"ebay.co.uk",
 						"ebay.com.au"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 65,
 					"Domains": [
 						"techdata.com",
 						"techdata.ch"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 66,
 					"Domains": [
 						"schwab.com",
 						"schwabplan.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 68,
 					"Domains": [
 						"tesla.com",
 						"teslamotors.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 69,
@@ -815,16 +745,14 @@
 						"morganstanleyclientserv.com",
 						"stockplanconnect.com",
 						"ms.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 70,
 					"Domains": [
 						"taxact.com",
 						"taxactonline.com"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 71,
@@ -840,8 +768,7 @@
 						"wikiversity.org",
 						"wikivoyage.org",
 						"wiktionary.org"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 72,
@@ -899,8 +826,7 @@
 						"airbnb.pt",
 						"airbnb.ru",
 						"airbnb.se"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 73,
@@ -945,8 +871,7 @@
 						"eventbrite.pt",
 						"eventbrite.ru",
 						"eventbrite.se"
-					],
-					"Excluded": false
+					]
 				},
 				{
 					"Type": 74,
@@ -957,8 +882,7 @@
 						"serverfault.com",
 						"mathoverflow.net",
 						"askubuntu.com"
-					],
-					"Excluded": false
+					]
 				}
 			]
 		}

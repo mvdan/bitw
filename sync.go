@@ -50,24 +50,56 @@ type GlobalEquivalentDomains struct {
 }
 
 type Cipher struct {
-	Type           int
-	FolderID       string
-	OrganizationID string
-	Favorite       bool
-	Edit           bool
-	ID             string
-	// Attachments TODO
+	Type                int
+	FolderID            string
+	OrganizationID      string
+	Favorite            bool
+	Edit                bool
+	ID                  string
+	Attachments         interface{} // TODO
 	OrganizationUseTotp bool
 	RevisionDate        time.Time
 	CollectionIDs       []string
 
-	// Card TODO
-	Fields []Field
-	// Identity TODO
-	Login Login
-	Name  string
-	// Notes TODO
+	Card       Card
+	Fields     []Field
+	Identity   Identity
+	Login      Login
+	Name       string
+	Notes      string
 	SecureNote SecureNote
+}
+
+type Card struct {
+	CardholderName string
+	Brand          string
+	Number         string
+	ExpMonth       string
+	ExpYear        string
+	Code           string
+}
+
+type Identity struct {
+	Title      string
+	FirstName  string
+	MiddleName string
+	LastName   string
+
+	Username       string
+	Company        string
+	SSN            string
+	PassportNumber string
+	LicenseNumber  string
+
+	Email      string
+	Phone      string
+	Address1   string
+	Address2   string
+	Address3   string
+	City       string
+	State      string
+	PostalCode string
+	Country    string
 }
 
 func (c *Cipher) Match(attr, value string) bool {
