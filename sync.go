@@ -17,6 +17,8 @@ type SyncData struct {
 	Domains Domains
 }
 
+type CipherString string
+
 type Profile struct {
 	ID                 string
 	Name               string
@@ -26,8 +28,8 @@ type Profile struct {
 	MasterPasswordHint string
 	Culture            string
 	TwoFactorEnabled   bool
-	Key                string
-	PrivateKey         string
+	Key                CipherString
+	PrivateKey         CipherString
 	SecurityStamp      string
 	Organizations      []string
 }
@@ -65,41 +67,41 @@ type Cipher struct {
 	Fields     []Field
 	Identity   Identity
 	Login      Login
-	Name       string
-	Notes      string
+	Name       CipherString
+	Notes      CipherString
 	SecureNote SecureNote
 }
 
 type Card struct {
-	CardholderName string
-	Brand          string
-	Number         string
-	ExpMonth       string
-	ExpYear        string
-	Code           string
+	CardholderName CipherString
+	Brand          CipherString
+	Number         CipherString
+	ExpMonth       CipherString
+	ExpYear        CipherString
+	Code           CipherString
 }
 
 type Identity struct {
-	Title      string
-	FirstName  string
-	MiddleName string
-	LastName   string
+	Title      CipherString
+	FirstName  CipherString
+	MiddleName CipherString
+	LastName   CipherString
 
-	Username       string
-	Company        string
-	SSN            string
-	PassportNumber string
-	LicenseNumber  string
+	Username       CipherString
+	Company        CipherString
+	SSN            CipherString
+	PassportNumber CipherString
+	LicenseNumber  CipherString
 
-	Email      string
-	Phone      string
-	Address1   string
-	Address2   string
-	Address3   string
-	City       string
-	State      string
-	PostalCode string
-	Country    string
+	Email      CipherString
+	Phone      CipherString
+	Address1   CipherString
+	Address2   CipherString
+	Address3   CipherString
+	City       CipherString
+	State      CipherString
+	PostalCode CipherString
+	Country    CipherString
 }
 
 func (c *Cipher) Match(attr, value string) bool {
@@ -129,11 +131,11 @@ type Field struct {
 }
 
 type Login struct {
-	Password string
+	Password CipherString
 	Totp     string
-	URI      string
+	URI      CipherString
 	URIs     []URI
-	Username string
+	Username CipherString
 }
 
 type URI struct {

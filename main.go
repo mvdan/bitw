@@ -270,7 +270,7 @@ func run(args ...string) (err error) {
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.AlignRight)
 		fmt.Fprintln(w, "name\turi\tusername\tpassword\t")
 		for _, cipher := range data.Sync.Ciphers {
-			for _, cipherStr := range [...]string{
+			for _, cipherStr := range [...]CipherString{
 				cipher.Name,
 				cipher.Login.URI,
 				cipher.Login.Username,
@@ -349,16 +349,18 @@ func stretchKey(orig []byte) (key, macKey []byte) {
 	return key, macKey
 }
 
-func decryptStr(cipherStr string) (string, error) {
-	dec, err := decrypt(cipherStr)
+func decryptStr(s CipherString) (string, error) {
+	dec, err := decrypt(s)
 	if err != nil {
 		return "", err
 	}
 	return string(dec), nil
 }
 
-func decrypt(cipherStr string) ([]byte, error) {
-	if cipherStr == "" {
+// TODO: turn this into a method
+
+func decrypt(s CipherString) ([]byte, error) {
+	if s == "" {
 		return nil, nil
 	}
 	if err := ensureDecryptKey(); err != nil {
@@ -369,7 +371,7 @@ func decrypt(cipherStr string) ([]byte, error) {
 		return nil, err
 	}
 
-	typ, iv, ct, mac, err := parseCipher(cipherStr)
+	typ, iv, ct, mac, err := parseCipher(s)
 	if err != nil {
 		return nil, err
 	}
@@ -400,7 +402,8 @@ func unpad(src []byte) []byte {
 	return src[:len(src)-int(n)]
 }
 
-func parseCipher(s string) (typ int, iv, ct, mac []byte, err error) {
+func parseCipher(cs CipherString) (typ int, iv, ct, mac []byte, err error) {
+	s := string(cs)
 	i := strings.IndexByte(s, '.')
 	if i < 0 {
 		return 0, nil, nil, nil, fmt.Errorf("invalid cipher string %q", s)
