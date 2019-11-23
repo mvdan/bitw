@@ -1,11 +1,11 @@
 {
 	"DeviceID": "cfd6811f-7f66-4393-bbdf-4d509ae4904b",
-	"AccessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkJDMzZDMjE0REI0OEYyMzVCNzdEQTNGMTcyMEMxQTM1QTk2MkVBNDMiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJ2RGJDRk50SThqVzNmYVB4Y2d3YU5hbGk2a00ifQ.eyJuYmYiOjE1NzQ1MjQ3NjgsImV4cCI6MTU3NDYxMTE2OCwiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS5iaXR3YXJkZW4uY29tIiwiYXVkIjpbImh0dHBzOi8vaWRlbnRpdHkuYml0d2FyZGVuLmNvbS9yZXNvdXJjZXMiLCJhcGkiXSwiY2xpZW50X2lkIjoiY29ubmVjdG9yIiwic3ViIjoiNjZiNTQzNTItZDMxMS00ODY2LTkwY2ItYWE2ZDAwZDYyZjNiIiwiYXV0aF90aW1lIjoxNTc0NTI0NzY4LCJpZHAiOiJiaXR3YXJkZW4iLCJwcmVtaXVtIjpmYWxzZSwiZW1haWwiOiJ0ZXN0bm90ZmFAbXZkYW4uY2MiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwic3N0YW1wIjoiRUFDWldRTEZaQUw2WFZZQzcyRVZJUUNWRFNOSU8yMlEiLCJuYW1lIjoiVGVzdCBXaXRob3V0IFRGQSIsImRldmljZSI6ImNmZDY4MTFmLTdmNjYtNDM5My1iYmRmLTRkNTA5YWU0OTA0YiIsInNjb3BlIjpbImFwaSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJBcHBsaWNhdGlvbiJdfQ.jmP7fN-TEZqSISWGiL500pSDkwXABHaibhzE4wRKJOjNDZou_Dnu-Z2WhEJGJsCG3xeBHNLHTgiMx6scZcUwgrl0F5jnNjabWXIY2wPoD20V5EqYo19DivIy5P2rA12OPzkPAXO1FKnDKQeICGb_Za3qbpvptP0OQKXYjeytXY2CQgfvXzT06RqFqAHg_3e7y6LnDWidEpWKVYT1DxiHKLX_xqKKccpENQv_943O4MPwAFg7g2dI9LHPn0A559zZZzk04nQSa-kfFB8_KJ29ktbUSJAqPRnElSn_z537U3Kq-dy0q5kaHkKSCBDqCB624Qz7W-WSm1hREGy0kXPo9hDMWubUvZCNdQp1hF12Wx5B-NiG_V8nyoqxLnKOYxVJpwVHfBrMA_0gNiL4-YhHvycgtBPWkTBDZ-CEu6qJ6TALbhO-fgvTZcdOBmPEDOuvDBKl0GNUJTecBYysuXjMtzNmu_HFlr02v7ePQRD-A3ppQlVWjzzKB26C8giKVPBJyO5r_QOecA8OrQZ1-CxMuo7O0fIsjr0w61qILNznksNZ1hJvSmQDiaflMa38PBBYTI9qPKXYF7XMmqwkt6CC9qvK9QJc9c2CsjeYS5LVuzLQAF8twTlLISYpC_vzGqTY-nOPwh-rQZf26DFueOnXXaRkHfr0-yqsn0xELpbp2aw",
-	"RefreshToken": "9788aee848e224dfc020c1db3813d1df645eb40c66780ebd52f1cc38b81c81fb",
-	"TokenExpiry": "2019-11-24T15:59:28.540959279Z",
+	"AccessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkJDMzZDMjE0REI0OEYyMzVCNzdEQTNGMTcyMEMxQTM1QTk2MkVBNDMiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJ2RGJDRk50SThqVzNmYVB4Y2d3YU5hbGk2a00ifQ.eyJuYmYiOjE1NzQ1MjUyNTYsImV4cCI6MTU3NDYxMTY1NiwiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS5iaXR3YXJkZW4uY29tIiwiYXVkIjpbImh0dHBzOi8vaWRlbnRpdHkuYml0d2FyZGVuLmNvbS9yZXNvdXJjZXMiLCJhcGkiXSwiY2xpZW50X2lkIjoiY29ubmVjdG9yIiwic3ViIjoiNjZiNTQzNTItZDMxMS00ODY2LTkwY2ItYWE2ZDAwZDYyZjNiIiwiYXV0aF90aW1lIjoxNTc0NTI1MjU2LCJpZHAiOiJiaXR3YXJkZW4iLCJwcmVtaXVtIjpmYWxzZSwiZW1haWwiOiJ0ZXN0bm90ZmFAbXZkYW4uY2MiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwic3N0YW1wIjoiRUFDWldRTEZaQUw2WFZZQzcyRVZJUUNWRFNOSU8yMlEiLCJuYW1lIjoiVGVzdCBXaXRob3V0IFRGQSIsImRldmljZSI6ImNmZDY4MTFmLTdmNjYtNDM5My1iYmRmLTRkNTA5YWU0OTA0YiIsInNjb3BlIjpbImFwaSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJBcHBsaWNhdGlvbiJdfQ.hD_GispEQwrzZAk0Sjz_Mnmt1NKAoWI49xyS9NimiYxgR3c8cDgaysHWsZzF6igWbhq_7rbhPqacQKn7TAmVh1OeBUy7fx0pIvUji_tGAvZPxs_88Mt-H-TjfqsFUNQme6pKSBsRl_vZpJqACn5URZ-9kEK0VD7jsJ_tEXhi1H7nGZdw4fagbnbPnYMbNbtbIovBVUeScfkrI4n-ijahO-tcOSd7EeEF0EjlHm4CVyHTr1grXctySYw-riWV4SFuj0atbGFV_-sd52qvi6DFlRvEAovp1FbYOrGk1GbdBU7iHxgIeXZHq-KzffiNcwb92QtaeQrfrbGDbHHf7Q9EgE3XltItSUWY-K_acZEmGJxALTOaQatbf42cW1RdmytolslgQoifttZJtLqYCWWRY3W3_54XAge7PSvAVyyJPsKy0K_eTQfirTZ49C1Zc_dAcssZGVlnzxjoH63V8gDrc8xxFFXKqVHdi5GvYopSJ492uccZDGieflqTU_KDn72UkRX5AnXLdeRxmqqnF5pXJm0z83IAONsWbQC_izKddz1LBoocpaNpgLb86hBTF0ZBvAf6noQ-U1cMLUmsOjwvm6MOAHOdPkNnb3CQY2GZ_KNTE0hK2gYy7YnvIGbQczdjOh0xi2BtNGg3CaTXyQJss_xjaYDkGslHUSjlvA4Vthk",
+	"RefreshToken": "39f1745963b488ac8eb84c5ad24c52949cd3349aacf449c637f4d753f6c73fe8",
+	"TokenExpiry": "2019-11-24T16:07:36.128187261Z",
 	"KDF": 0,
 	"KDFIterations": 100000,
-	"LastSync": "2019-11-23T15:59:29.062587957Z",
+	"LastSync": "2019-11-23T16:07:36.888239305Z",
 	"Sync": {
 		"Profile": {
 			"ID": "66b54352-d311-4866-90cb-aa6d00d62f3b",
@@ -25,8 +25,8 @@
 		"Ciphers": [
 			{
 				"Type": 1,
-				"FolderID": "",
-				"OrganizationID": "",
+				"FolderID": "00000000-0000-0000-0000-000000000000",
+				"OrganizationID": "00000000-0000-0000-0000-000000000000",
 				"Favorite": false,
 				"Edit": true,
 				"ID": "e774c52d-aebb-4c40-aae7-aa6d00f13011",
@@ -83,8 +83,8 @@
 			},
 			{
 				"Type": 1,
-				"FolderID": "",
-				"OrganizationID": "",
+				"FolderID": "00000000-0000-0000-0000-000000000000",
+				"OrganizationID": "00000000-0000-0000-0000-000000000000",
 				"Favorite": false,
 				"Edit": true,
 				"ID": "55626dc4-7c07-4506-9eaf-aa76009892d4",
@@ -136,8 +136,8 @@
 			},
 			{
 				"Type": 1,
-				"FolderID": "",
-				"OrganizationID": "",
+				"FolderID": "00000000-0000-0000-0000-000000000000",
+				"OrganizationID": "00000000-0000-0000-0000-000000000000",
 				"Favorite": false,
 				"Edit": true,
 				"ID": "a389bbb8-3084-4c81-8da3-aa770093ddef",
@@ -214,8 +214,8 @@
 			},
 			{
 				"Type": 3,
-				"FolderID": "",
-				"OrganizationID": "",
+				"FolderID": "00000000-0000-0000-0000-000000000000",
+				"OrganizationID": "00000000-0000-0000-0000-000000000000",
 				"Favorite": false,
 				"Edit": true,
 				"ID": "7b34b71b-833b-4089-acad-ab0e00f39513",
@@ -267,8 +267,8 @@
 			},
 			{
 				"Type": 4,
-				"FolderID": "",
-				"OrganizationID": "",
+				"FolderID": "00000000-0000-0000-0000-000000000000",
+				"OrganizationID": "00000000-0000-0000-0000-000000000000",
 				"Favorite": false,
 				"Edit": true,
 				"ID": "f75f972a-d5e2-41db-bca8-ab0e00f4166c",
@@ -320,8 +320,8 @@
 			},
 			{
 				"Type": 2,
-				"FolderID": "",
-				"OrganizationID": "",
+				"FolderID": "00000000-0000-0000-0000-000000000000",
+				"OrganizationID": "00000000-0000-0000-0000-000000000000",
 				"Favorite": false,
 				"Edit": true,
 				"ID": "8f80f479-8f2c-4074-ba61-ab0e00f428d5",

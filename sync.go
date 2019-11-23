@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type SyncData struct {
@@ -20,7 +22,7 @@ type SyncData struct {
 type CipherString string
 
 type Profile struct {
-	ID                 string
+	ID                 uuid.UUID
 	Name               string
 	Email              string
 	EmailVerified      bool
@@ -35,7 +37,7 @@ type Profile struct {
 }
 
 type Folder struct {
-	ID           string
+	ID           uuid.UUID
 	Name         string
 	RevisionDate time.Time
 }
@@ -52,12 +54,12 @@ type GlobalEquivalentDomains struct {
 }
 
 type Cipher struct {
-	Type                int
-	FolderID            string
-	OrganizationID      string
+	Type                CipherType
+	FolderID            uuid.UUID
+	OrganizationID      uuid.UUID
 	Favorite            bool
 	Edit                bool
-	ID                  string
+	ID                  uuid.UUID
 	Attachments         interface{} // TODO
 	OrganizationUseTotp bool
 	RevisionDate        time.Time
@@ -71,6 +73,16 @@ type Cipher struct {
 	Notes      CipherString
 	SecureNote SecureNote
 }
+
+type CipherType int
+
+const (
+	_ CipherType = iota
+	CipherLogin
+	CipherCard
+	CipherIdentity
+	CipherNote
+)
 
 type Card struct {
 	CardholderName CipherString
@@ -109,7 +121,7 @@ func (c *Cipher) Match(attr, value string) bool {
 	var err error
 	switch attr {
 	case "id":
-		got = c.ID
+		got = c.ID.String()
 	case "name":
 		got, err = decryptStr(c.Name)
 	case "username":
@@ -125,10 +137,12 @@ func (c *Cipher) Match(attr, value string) bool {
 }
 
 type Field struct {
-	Type  int
-	Name  string
-	Value string
+	Type  FieldType
+	Name  CipherString
+	Value CipherString
 }
+
+type FieldType int
 
 type Login struct {
 	Password CipherString
@@ -140,12 +154,16 @@ type Login struct {
 
 type URI struct {
 	URI   string
-	Match int
+	Match URIMatch
 }
 
+type URIMatch int
+
 type SecureNote struct {
-	Type int
+	Type SecureNoteType
 }
+
+type SecureNoteType int
 
 func sync(ctx context.Context) error {
 	now := time.Now().UTC()

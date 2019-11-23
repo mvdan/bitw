@@ -5,11 +5,12 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/godbus/dbus/v5"
+	"github.com/google/uuid"
 )
 
 const (
@@ -93,9 +94,8 @@ Ciphers:
 				continue Ciphers
 			}
 		}
-		// Object paths can only contain letters, numbers, and
-		// underscores.
-		id := dbusID(cipher.ID)
+		// Object paths can only contain letters, numbers, and underscores.
+		id := rawUUID(cipher.ID)
 		unlocked = append(unlocked, objPath("/collections/default/"+id))
 	}
 	return
@@ -104,15 +104,15 @@ Ciphers:
 func (d *dbusService) secretByPath(item dbus.ObjectPath) (Cipher, bool) {
 	id := path.Base(string(item))
 	for _, cipher := range data.Sync.Ciphers {
-		if dbusID(cipher.ID) == id {
+		if rawUUID(cipher.ID) == id {
 			return cipher, true
 		}
 	}
 	return Cipher{}, false
 }
 
-func dbusID(id string) string {
-	return strings.Replace(id, "-", "", -1)
+func rawUUID(id uuid.UUID) string {
+	return hex.EncodeToString(id[:])
 }
 
 type dbusSecret struct {
