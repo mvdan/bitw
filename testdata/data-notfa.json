@@ -1,11 +1,11 @@
 {
 	"DeviceID": "cfd6811f-7f66-4393-bbdf-4d509ae4904b",
-	"AccessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkJDMzZDMjE0REI0OEYyMzVCNzdEQTNGMTcyMEMxQTM1QTk2MkVBNDMiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJ2RGJDRk50SThqVzNmYVB4Y2d3YU5hbGk2a00ifQ.eyJuYmYiOjE1NjE0NTMyOTYsImV4cCI6MTU2MTUzOTY5NiwiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS5iaXR3YXJkZW4uY29tIiwiYXVkIjpbImh0dHBzOi8vaWRlbnRpdHkuYml0d2FyZGVuLmNvbS9yZXNvdXJjZXMiLCJhcGkiXSwiY2xpZW50X2lkIjoiY29ubmVjdG9yIiwic3ViIjoiNjZiNTQzNTItZDMxMS00ODY2LTkwY2ItYWE2ZDAwZDYyZjNiIiwiYXV0aF90aW1lIjoxNTYxNDUzMjk2LCJpZHAiOiJiaXR3YXJkZW4iLCJwcmVtaXVtIjpmYWxzZSwiZW1haWwiOiJ0ZXN0bm90ZmFAbXZkYW4uY2MiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwic3N0YW1wIjoiRUFDWldRTEZaQUw2WFZZQzcyRVZJUUNWRFNOSU8yMlEiLCJuYW1lIjoiVGVzdCBXaXRob3V0IFRGQSIsImRldmljZSI6ImNmZDY4MTFmLTdmNjYtNDM5My1iYmRmLTRkNTA5YWU0OTA0YiIsInNjb3BlIjpbImFwaSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJBcHBsaWNhdGlvbiJdfQ.AJ7uSW_QlIlrH8eZQO8Ps9FCpehobeoryOTPKPG2Km_jvq4qFMnLqz0pU15fJMF3F-X6vHP7I_CP3N74aMv6h2MyKpLnmtp1rIJOOOrb2EvQDNHqcglLbOsxXay28EbtvrqrNAvGFytOtX0Yqx152nA1zhVOA0ddGxsGlKgSuAncxCWvCwTmKJJZ-qV6mVOhMi8NXaEIGpd_6tFvqC3nMkN1OOL3yciXYCwy-klUf9DJOnNbXdd7AfrauO_dCTGfmF92XVFRuorBwwocNrE0pB3OKWdKk9foqUFJZJh5tUXUXWwGWZxeE8Rs1XmbmAbdgxJTdGPhQs3UrNcLNAKvH_pc49HObBj-s3JEjDTzyNGfT5E2-ruIDrj3NwgcnPuXWLpxbCvzEqVTzmmInZ-ILU0uMFo7iL4YqgUGk4a_i5eo_f7Xax0Rx1SXDsDynYt8PMXwceCc8JcaEO2rapaBQOJn8C6Ws-3CkCAAyc7aLJk4fLMzP0_429RSrH01ny_Zdu4MTlV0UBi37NeFBWtBzl5RiXGypzs-5_BUnl1H6ubcH8OShIgujuoIVpm3t7URL0woDRSaDqnC7rEdn0PZe9CzuHtCwr55gYd8Rnego2wAJcPUtk-E0TFQbxhH8EuMvv2CuUgyuyD7BcrnETGG_XPakeeU0xhFbkTvQn2EEQI",
-	"RefreshToken": "054ad60842b1422731ba1d017d810d0aec17f0905714c815b6019f8e1271fb14",
-	"TokenExpiry": "2019-06-26T09:01:36.03804854Z",
+	"AccessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkJDMzZDMjE0REI0OEYyMzVCNzdEQTNGMTcyMEMxQTM1QTk2MkVBNDMiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJ2RGJDRk50SThqVzNmYVB4Y2d3YU5hbGk2a00ifQ.eyJuYmYiOjE1NzQ1MjA2MDMsImV4cCI6MTU3NDYwNzAwMywiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS5iaXR3YXJkZW4uY29tIiwiYXVkIjpbImh0dHBzOi8vaWRlbnRpdHkuYml0d2FyZGVuLmNvbS9yZXNvdXJjZXMiLCJhcGkiXSwiY2xpZW50X2lkIjoiY29ubmVjdG9yIiwic3ViIjoiNjZiNTQzNTItZDMxMS00ODY2LTkwY2ItYWE2ZDAwZDYyZjNiIiwiYXV0aF90aW1lIjoxNTc0NTIwNjAzLCJpZHAiOiJiaXR3YXJkZW4iLCJwcmVtaXVtIjpmYWxzZSwiZW1haWwiOiJ0ZXN0bm90ZmFAbXZkYW4uY2MiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwic3N0YW1wIjoiRUFDWldRTEZaQUw2WFZZQzcyRVZJUUNWRFNOSU8yMlEiLCJuYW1lIjoiVGVzdCBXaXRob3V0IFRGQSIsImRldmljZSI6ImNmZDY4MTFmLTdmNjYtNDM5My1iYmRmLTRkNTA5YWU0OTA0YiIsInNjb3BlIjpbImFwaSIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJBcHBsaWNhdGlvbiJdfQ.W80bvQ6pStW0_hVK2vDY2NYmTdRp9zNM93gJoduCXdvMbMlIU1YXJnq-vlURd8MBfrMQ_t81nQSZN5AIdfCKtnQT0QLPHNZrGT-VOgSjmFNB_kze_c78ZPko2_3jELVGj6reKKnXVe1-5ibel7FOY_BMNaMsnnpWhsCxRADbZOv-nDshOX50Z91y9gik_RyWAHiC9ihVih0a3vwKJL4rYaZA0Q-O8u7F-u8MCb6j6B0mRG0QDbXF0u21gYFUogNyEhvND9Gyxo-o2NK0xLyAzL2oCrMkSRKQOLkFvMleC2qvQFK4Sa7vYXDKZx1s-Vrskkn7UXmvGpxxGPxtX-mmqy2R03JRVfDBPhEEHN_bMgvI0PtIRCHdqtN9BnfRE4d3Sdj8UdtvTYr0DIFZoIG15kvkpZVhMwzFYIJwtMKzXpSRvoinzPX9XYxGJ6myqvo4B1lOCfO-k4f7pGwHeggeu88UqZ9Mp1-JQV10SGEU7E-NN0V3HHcQQl9zleelrBH6zy3R9KupS-BlqEh0gYLwwihcNuWSius6jWUUSHyAOW3o6w1n6i7C79V51ZacK6laAER1vjCtn_yEms1z8Kk0tbje5TPklLCs2TGyb7I_L2rLtJ-cHqQIemhvMz5KqqjDwWuBoJmAC9vBUv11MI8vHZfy9zPXDJYm3Ha6IHH3zAo",
+	"RefreshToken": "44a0f55254d0666cc59e83369bad7ec92de7b0a8105e63da36d6867e4564a06e",
+	"TokenExpiry": "2019-11-24T14:50:03.457744778Z",
 	"KDF": 0,
 	"KDFIterations": 100000,
-	"LastSync": "2019-06-25T09:01:37.135027378Z",
+	"LastSync": "2019-11-23T14:50:03.969701671Z",
 	"Sync": {
 		"Profile": {
 			"ID": "66b54352-d311-4866-90cb-aa6d00d62f3b",
@@ -30,13 +30,10 @@
 				"Favorite": false,
 				"Edit": true,
 				"ID": "e774c52d-aebb-4c40-aae7-aa6d00f13011",
-				"Attachments": null,
 				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-06-15T14:38:08.2666667Z",
 				"CollectionIDs": [],
-				"Card": "",
 				"Fields": null,
-				"Identity": "",
 				"Login": {
 					"Password": "2.vJw50ZK539wgS5bBGBbFhQ==|2Ot7gsdzT4JQ2Eil3tIq6w==|qEpYEmLuYDwFG1ICWfuPXEMyUt5Trek2nIeqPcdv/jA=",
 					"Totp": "",
@@ -50,7 +47,6 @@
 					"Username": "2.E8pxXdTg60mDe/WdpXzIhg==|F3/3y/f8QHW5ghvnCNR+iA==|WVoohoY2f7RPzj6ocLWoKigubXmi4yys+weE0/iXFjM="
 				},
 				"Name": "2.EPAQPhGICOCDgpmA5PNkZA==|GOqIw8a3A2qHwahbk/2f6Q==|6Dz7w5J+hMCASoC7EBhE1r4gw7smeqW+mKzpdPcsSMU=",
-				"Notes": "",
 				"SecureNote": {
 					"Type": 0
 				}
@@ -62,13 +58,10 @@
 				"Favorite": false,
 				"Edit": true,
 				"ID": "55626dc4-7c07-4506-9eaf-aa76009892d4",
-				"Attachments": null,
 				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-06-24T09:15:30.1966667Z",
 				"CollectionIDs": [],
-				"Card": "",
 				"Fields": null,
-				"Identity": "",
 				"Login": {
 					"Password": "2.Xt7QiBtz4U9i4B4La/vahA==|oEctJAIwsrxtPCSSsoAO7g==|tnVGxFb5CBnfJBVMtb7xoGVDub3w3CBhcl7Nj4iDHz8=",
 					"Totp": "",
@@ -77,7 +70,6 @@
 					"Username": ""
 				},
 				"Name": "2.HC687j/6rorSDXD3SXoqbg==|0n2JQr/BHgzB2tn2pAVWyQ==|0W/+jX/uWRFtyWD7a6sIuXPmMDhJxefF1x1I7F9qmKU=",
-				"Notes": "",
 				"SecureNote": {
 					"Type": 0
 				}
@@ -89,11 +81,9 @@
 				"Favorite": false,
 				"Edit": true,
 				"ID": "a389bbb8-3084-4c81-8da3-aa770093ddef",
-				"Attachments": null,
 				"OrganizationUseTotp": false,
 				"RevisionDate": "2019-06-25T08:58:22.02Z",
 				"CollectionIDs": [],
-				"Card": "",
 				"Fields": [
 					{
 						"Type": 0,
@@ -111,7 +101,6 @@
 						"Value": "2.0sq9ED3FaU0Ecb5StQrfdQ==|fnjYdvOACh48WmVnZs8Xhw==|6BqCIzhVg3MRkMjqIoxaGUvQlXFMzh23CJCWEJWjAK8="
 					}
 				],
-				"Identity": "",
 				"Login": {
 					"Password": "2.L/MbjQnlx+okG2vyyZbxiQ==|B0lXBLlqnwaNJXTBxJn5RA==|uRoedMgMKi9oHlZjfAC3g06xRnK9aDSexwG8HmXZkmw=",
 					"Totp": "2.f3cNwdUgCyUUldtfC1d82w==|sxSLQWxYB/IulJFs5tz+9w==|+KfGc7O7DY9MiBq1/M6X519qnsBOEypPzrt/7CbL1CQ=",
@@ -129,7 +118,75 @@
 					"Username": "2.iHzprFGKe8sIe+dRCVlEAg==|4w5/OU5Yv8pqzRBzTcdFgg==|D7Hw5PL1ef7kHAg7FKKYVJH0FZpFktSvlzaiRH2fd+A="
 				},
 				"Name": "2.G76KcMuYko/MvrPNcJDOrg==|iOaLA6yYAq4r1Hzzef5jBA==|yAskzd7Y+DCLdz0VoN+KLHkzbzQo+vk/m5+QobFj0u0=",
-				"Notes": "2.klNkT2BneCf6Rxf0xEKlRw==|oFpB4ZMJ7sSDMB8NE0lB3Q==|xcEnADo7NIIX3CEyTjd0naTBTVdXOZPo/oualkRkJWI=",
+				"SecureNote": {
+					"Type": 0
+				}
+			},
+			{
+				"Type": 3,
+				"FolderID": "",
+				"OrganizationID": "",
+				"Favorite": false,
+				"Edit": true,
+				"ID": "7b34b71b-833b-4089-acad-ab0e00f39513",
+				"OrganizationUseTotp": false,
+				"RevisionDate": "2019-11-23T14:46:51.3666667Z",
+				"CollectionIDs": [],
+				"Fields": null,
+				"Login": {
+					"Password": "",
+					"Totp": "",
+					"URI": "",
+					"URIs": null,
+					"Username": ""
+				},
+				"Name": "2.Mzb8YdUm+GPkqr03t+O1kw==|2J/a1D3G4jhp/cWcSUoglg==|wJh97w7ZnSCSDmLcKqIQfkK2SW4XnSxiy9u5Rn5G5JE=",
+				"SecureNote": {
+					"Type": 0
+				}
+			},
+			{
+				"Type": 4,
+				"FolderID": "",
+				"OrganizationID": "",
+				"Favorite": false,
+				"Edit": true,
+				"ID": "f75f972a-d5e2-41db-bca8-ab0e00f4166c",
+				"OrganizationUseTotp": false,
+				"RevisionDate": "2019-11-23T14:48:41.7433333Z",
+				"CollectionIDs": [],
+				"Fields": null,
+				"Login": {
+					"Password": "",
+					"Totp": "",
+					"URI": "",
+					"URIs": null,
+					"Username": ""
+				},
+				"Name": "2.wjf68OX0MD94JKVin5R5pQ==|VVZczGNLYFA3mZWKipMTMw==|QXn4bDphnWGBLDZSNvlaiMAtlRiC+TecePmrNCI0gFY=",
+				"SecureNote": {
+					"Type": 0
+				}
+			},
+			{
+				"Type": 2,
+				"FolderID": "",
+				"OrganizationID": "",
+				"Favorite": false,
+				"Edit": true,
+				"ID": "8f80f479-8f2c-4074-ba61-ab0e00f428d5",
+				"OrganizationUseTotp": false,
+				"RevisionDate": "2019-11-23T14:48:57.4533333Z",
+				"CollectionIDs": [],
+				"Fields": null,
+				"Login": {
+					"Password": "",
+					"Totp": "",
+					"URI": "",
+					"URIs": null,
+					"Username": ""
+				},
+				"Name": "2.8HWg+4ZwJwSCF7UtC/Xi0Q==|/ycuakOTv7PU/9F7NrYf1TBc4x0xAtv4HadtHyVYRh0=|Zrh67qVWWDS9PvTfOnMlXLX7T3Pbh/u1/PPT4JWj8RY=",
 				"SecureNote": {
 					"Type": 0
 				}
@@ -245,7 +302,8 @@
 						"windows.com",
 						"microsoftonline.com",
 						"office365.com",
-						"microsoftstore.com"
+						"microsoftstore.com",
+						"xbox.com"
 					],
 					"Excluded": false
 				},
@@ -897,7 +955,8 @@
 						"superuser.com",
 						"stackoverflow.com",
 						"serverfault.com",
-						"mathoverflow.net"
+						"mathoverflow.net",
+						"askubuntu.com"
 					],
 					"Excluded": false
 				}

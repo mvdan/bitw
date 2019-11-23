@@ -92,7 +92,10 @@ func TestMain(m *testing.M) {
 	}))
 }
 
-var write = flag.Bool("w", false, "update saved testdata files")
+var (
+	write  = flag.Bool("w", false, "update saved testdata files")
+	update = flag.Bool("u", false, "update testscript output files")
+)
 
 func TestScripts(t *testing.T) {
 	t.Parallel()
@@ -154,6 +157,7 @@ func TestScripts(t *testing.T) {
 			}
 			return false, nil
 		},
+		UpdateScripts: *update,
 	})
 }
 

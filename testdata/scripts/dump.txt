@@ -15,7 +15,10 @@ bitw dump
 cmp stdout stdout.golden
 
 -- stdout.golden --
-         name         uri  username       password
-       login1 domain1.com username1      password1
- justpassword                       singlepassword
-    allfields        url1  username       password
+             name         uri  username       password
+           login1 domain1.com username1      password1
+     justpassword                       singlepassword
+        allfields        url1  username       password
+      john's card                                     
+  John's Identity                                     
+ Some secure note                                     
