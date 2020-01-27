@@ -93,7 +93,6 @@ type Profile struct {
 	Key                CipherString
 	PrivateKey         CipherString
 	SecurityStamp      string
-	Organizations      []string
 }
 
 type Folder struct {
