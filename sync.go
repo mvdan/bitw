@@ -81,6 +81,27 @@ func b64decode(src []byte) ([]byte, error) {
 	return dst, nil
 }
 
+type Organization struct {
+	Object          string
+	Id              uuid.UUID
+	Name            string
+	UseGroups       bool
+	UseDirectory    bool
+	UseEvents       bool
+	UseTotp         bool
+	Use2fa          bool
+	UseApi          bool
+	UsersGetPremium bool
+	SelfHost        bool
+	Seats           int
+	MaxCollections  int
+	MaxStorageGb    int
+	Key             string
+	Status          int
+	Type            int
+	Enabled         bool
+}
+
 type Profile struct {
 	ID                 uuid.UUID
 	Name               string
@@ -93,7 +114,7 @@ type Profile struct {
 	Key                CipherString
 	PrivateKey         CipherString
 	SecurityStamp      string
-	Organizations      []string
+	Organizations      []Organization
 }
 
 type Folder struct {
