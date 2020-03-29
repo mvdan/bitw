@@ -1,0 +1,24 @@
+env EMAIL=foo@bar.baz
+env PASSWORD=badpassword
+
+env CONFIG_DIR=config_badkey
+! bitw login
+stderr 'unknown config key'
+
+env CONFIG_DIR=config_badkeycase
+! bitw login
+stderr 'unknown config key'
+
+env CONFIG_DIR=config_badsection
+! bitw login
+stderr 'sections are not used'
+
+-- config_badkey/config --
+foo=bar
+
+-- config_badkeycase/config --
+apiurl=https://api.bitwarden.com
+
+-- config_badsection/config --
+[foo]
+email=foo@bar.baz

@@ -215,6 +215,24 @@ func run(args ...string) (err error) {
 	if err != nil {
 		return err
 	}
+	for _, section := range config.AllSections() {
+		if section.Name() != "" {
+			return fmt.Errorf("sections are not used in config files yet")
+		}
+		for _, key := range section.Keys() {
+			switch key {
+			case "email":
+				email = section.Get(key)
+			case "apiURL":
+				apiURL = section.Get(key)
+			case "identityURL":
+				idtURL = section.Get(key)
+			default:
+				return fmt.Errorf("unknown config key: %q", key)
+			}
+		}
+	}
+
 	if err := loadDataFile(filepath.Join(dir, "data.json")); err != nil {
 		return err
 	}
@@ -226,16 +244,6 @@ func run(args ...string) (err error) {
 			err = err1
 		}
 	}()
-
-	if e := config.GetKey("email"); e != "" {
-		email = e
-	}
-	if u := config.GetKey("apiURL"); u != "" {
-		apiURL = u
-	}
-	if u := config.GetKey("identityURL"); u != "" {
-		idtURL = u
-	}
 
 	if data.DeviceID == "" {
 		data.DeviceID = uuid.New().String()
