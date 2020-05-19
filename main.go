@@ -223,9 +223,9 @@ func run(args ...string) (err error) {
 			switch key {
 			case "email":
 				email = section.Get(key)
-			case "apiURL":
+			case "apiurl":
 				apiURL = section.Get(key)
-			case "identityURL":
+			case "identityurl":
 				idtURL = section.Get(key)
 			default:
 				return fmt.Errorf("unknown config key: %q", key)
