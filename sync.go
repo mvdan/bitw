@@ -211,7 +211,7 @@ func (c *Cipher) Match(attr, value string) bool {
 		return false
 	}
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not decrypt %s: %v", attr, err)
+		fmt.Fprintf(os.Stderr, "could not decrypt %s: %v\n", attr, err)
 		return false
 	}
 	return got == value
