@@ -1,23 +1,33 @@
-env EMAIL=foo@bar.baz
-env PASSWORD=badpassword
+env CONFIG_DIR=config_good_camelcase
+bitw config
+stdout 'email.*camelcase'
+stdout 'apiURL.*nonexistent'
+
+env CONFIG_DIR=config_good_lowercase
+bitw config
+stdout 'email.*lowercase'
+stdout 'apiURL.*nonexistent'
 
 env CONFIG_DIR=config_badkey
-! bitw login
-stderr 'unknown config key'
-
-env CONFIG_DIR=config_badkeycase
-! bitw login
+! bitw config
 stderr 'unknown config key'
 
 env CONFIG_DIR=config_badsection
-! bitw login
+! bitw config
 stderr 'sections are not used'
+
+-- config_good_camelcase/config --
+email=camelcase@bar.baz
+apiURL=https://api.nonexistent.localhost
+identityURL=https://identity.nonexistent.localhost
+
+-- config_good_lowercase/config --
+email=lowercase@bar.baz
+apiurl=https://api.nonexistent.localhost
+identityurl=https://identity.nonexistent.localhost
 
 -- config_badkey/config --
 foo=bar
-
--- config_badkeycase/config --
-apiurl=https://api.bitwarden.com
 
 -- config_badsection/config --
 [foo]

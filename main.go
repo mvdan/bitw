@@ -45,6 +45,7 @@ Commands:
 	login   force a new login, even if not necessary
 	dump    list all the stored login secrets
 	serve   start the org.freedesktop.secrets D-Bus service
+	config  print the current configuration
 `[1:])
 	flagSet.PrintDefaults()
 }
@@ -220,12 +221,13 @@ func run(args ...string) (err error) {
 			return fmt.Errorf("sections are not used in config files yet")
 		}
 		for _, key := range section.Keys() {
+			// note that these are lowercased
 			switch key {
 			case "email":
 				email = section.Get(key)
-			case "apiURL":
+			case "apiurl":
 				apiURL = section.Get(key)
-			case "identityURL":
+			case "identityurl":
 				idtURL = section.Get(key)
 			default:
 				return fmt.Errorf("unknown config key: %q", key)
@@ -236,6 +238,14 @@ func run(args ...string) (err error) {
 	if err := loadDataFile(filepath.Join(dir, "data.json")); err != nil {
 		return err
 	}
+
+	if args[0] == "config" {
+		fmt.Printf("email       = %q\n", email)
+		fmt.Printf("apiURL      = %q\n", apiURL)
+		fmt.Printf("identityURL = %q\n", apiURL)
+		return nil
+	}
+
 	defer func() {
 		if !saveData {
 			return
