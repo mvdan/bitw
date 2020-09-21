@@ -242,7 +242,7 @@ func run(args ...string) (err error) {
 	if args[0] == "config" {
 		fmt.Printf("email       = %q\n", email)
 		fmt.Printf("apiURL      = %q\n", apiURL)
-		fmt.Printf("identityURL = %q\n", apiURL)
+		fmt.Printf("identityURL = %q\n", idtURL)
 		return nil
 	}
 
