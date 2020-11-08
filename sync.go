@@ -6,7 +6,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -42,13 +41,13 @@ type CipherString struct {
 type CipherStringType int
 
 const (
-	AesCbc256_B64 CipherStringType = 0
-	AesCbc128_HmacSha256_B64 CipherStringType = 1
-	AesCbc256_HmacSha256_B64 CipherStringType = 2
-	Rsa2048_OaepSha256_B64 CipherStringType = 3
-	Rsa2048_OaepSha1_B64 CipherStringType = 4
+	AesCbc256_B64                     CipherStringType = 0
+	AesCbc128_HmacSha256_B64          CipherStringType = 1
+	AesCbc256_HmacSha256_B64          CipherStringType = 2
+	Rsa2048_OaepSha256_B64            CipherStringType = 3
+	Rsa2048_OaepSha1_B64              CipherStringType = 4
 	Rsa2048_OaepSha256_HmacSha256_B64 CipherStringType = 5
-	Rsa2048_OaepSha1_HmacSha256_B64 CipherStringType = 6
+	Rsa2048_OaepSha1_HmacSha256_B64   CipherStringType = 6
 )
 
 func CipherStringTypeParse(str string) (CipherStringType, error) {
@@ -56,63 +55,124 @@ func CipherStringTypeParse(str string) (CipherStringType, error) {
 	if err != nil {
 		return 0, err
 	}
-	switch val {
-	case 0: return AesCbc256_B64, nil
-	case 1: return AesCbc128_HmacSha256_B64, nil
-	case 2: return AesCbc256_HmacSha256_B64, nil
-	// TODO: implemented these:
-	//case 3: return Rsa2048_OaepSha256_B64, nil
-	//case 4: return Rsa2048_OaepSha1_B64, nil
-	//case 5: return Rsa2048_OaepSha256_HmacSha256_B64, nil
-	//case 6: return Rsa2048_OaepSha1_HmacSha256_B64, nil
-	default:
+	strType := CipherStringType(val)
+
+	_, ok := parsers[strType]
+	if ok {
+		return strType, nil
+	} else {
 		return 0, fmt.Errorf("unsupported cipherstringtype: %v", val)
 	}
 }
 
-type CipherStringTypeParserFunc func(parts []string) (*CipherString, error)
+type CipherStringTypeParserFunc func(parts [][]byte) (*CipherString, error)
 
 var parsers = map[CipherStringType]CipherStringTypeParserFunc{
-	AesCbc256_B64: ParseAesCbc256_B64,
+	AesCbc256_B64:            ParseAesCbc256_B64,
 	AesCbc128_HmacSha256_B64: ParseAesCbc128_HmacSha256_B64,
 	AesCbc256_HmacSha256_B64: ParseAesCbc256_HmacSha256_B64,
+	// TODO: implement these:
+	//Rsa2048_OaepSha256_B64: someFunc,
+	//Rsa2048_OaepSha1_B64: someFunc,
+	//Rsa2048_OaepSha256_HmacSha256_B64: someFunc,
+	//Rsa2048_OaepSha1_HmacSha256_B64: someFunc,
 }
 
-func ParseAesCbc256_HmacSha256_B64(parts []string) (*CipherString, error) {
+func ParseAesCbc256_HmacSha256_B64(parts [][]byte) (*CipherString, error) {
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("can not parse: %v", parts)
 	}
+	s := &CipherString{
+		Type: AesCbc256_HmacSha256_B64,
+	}
+
+	var err error
+	if s.IV, err = b64decode(parts[0]); err != nil {
+		return s, err
+	}
+	if s.CT, err = b64decode(parts[1]); err != nil {
+		return s, err
+	}
+	// TODO: can we verify the MAC here?
+	if s.MAC, err = b64decode(parts[2]); err != nil {
+		return s, err
+	}
+
+	return s, nil
 }
 
-func ParseAesCbc128_HmacSha256_B64(parts []string) (*CipherString, error) {
+func ParseAesCbc128_HmacSha256_B64(parts [][]byte) (*CipherString, error) {
 	if len(parts) != 3 {
 		return nil, fmt.Errorf("can not parse: %v", parts)
 	}
+
+	s := &CipherString{
+		Type: AesCbc128_HmacSha256_B64,
+	}
+
+	var err error
+	if s.IV, err = b64decode(parts[0]); err != nil {
+		return s, err
+	}
+	if s.CT, err = b64decode(parts[1]); err != nil {
+		return s, err
+	}
+	// TODO: can we verify the MAC here?
+	if s.MAC, err = b64decode(parts[2]); err != nil {
+		return s, err
+	}
+
+	return s, nil
 }
 
-func ParseAesCbc256_B64(parts []string) (*CipherString, error) {
-	if len(parts) != 3 {
+func ParseAesCbc256_B64(parts [][]byte) (*CipherString, error) {
+	if len(parts) != 2 {
 		return nil, fmt.Errorf("can not parse: %v", parts)
 	}
 
+	s := &CipherString{
+		Type: AesCbc256_B64,
+	}
+
+	var err error
+	if s.IV, err = b64decode(parts[0]); err != nil {
+		return s, err
+	}
+	if s.CT, err = b64decode(parts[1]); err != nil {
+		return s, err
+	}
+
+	return s, nil
 }
 
 func (i CipherStringType) String() string {
 	switch i {
-	case AesCbc256_B64: return "AesCbc256_B64"
-	case AesCbc128_HmacSha256_B64: return "AesCbc128_HmacSha256_B64"
-	case AesCbc256_HmacSha256_B64: return "AesCbc256_HmacSha256_B64"
-	case Rsa2048_OaepSha256_B64: return "Rsa2048_OaepSha256_B64"
-	case Rsa2048_OaepSha1_B64: return "Rsa2048_OaepSha1_B64"
-	case Rsa2048_OaepSha256_HmacSha256_B64: return "Rsa2048_OaepSha256_HmacSha256_B64"
-	case Rsa2048_OaepSha1_HmacSha256_B64: return "Rsa2048_OaepSha1_HmacSha256_B64"
-	default: return "unknown"
+	case AesCbc256_B64:
+		return "AesCbc256_B64"
+	case AesCbc128_HmacSha256_B64:
+		return "AesCbc128_HmacSha256_B64"
+	case AesCbc256_HmacSha256_B64:
+		return "AesCbc256_HmacSha256_B64"
+	case Rsa2048_OaepSha256_B64:
+		return "Rsa2048_OaepSha256_B64"
+	case Rsa2048_OaepSha1_B64:
+		return "Rsa2048_OaepSha1_B64"
+	case Rsa2048_OaepSha256_HmacSha256_B64:
+		return "Rsa2048_OaepSha256_HmacSha256_B64"
+	case Rsa2048_OaepSha1_HmacSha256_B64:
+		return "Rsa2048_OaepSha1_HmacSha256_B64"
+	default:
+		return "unknown"
 	}
 }
 
 func (s CipherString) MarshalText() ([]byte, error) {
 	if s.Type == 0 {
-		return nil, nil
+		return []byte(fmt.Sprintf("%d.%s|%s",
+			s.Type,
+			b64enc.EncodeToString(s.IV),
+			b64enc.EncodeToString(s.CT),
+		)), nil
 	}
 	return []byte(fmt.Sprintf("%d.%s|%s|%s",
 		s.Type,
@@ -138,20 +198,19 @@ func (s *CipherString) UnmarshalText(data []byte) error {
 	data = data[i+1:]
 
 	parts := bytes.Split(data, []byte("|"))
-	if len(parts) != 3 {
-		return fmt.Errorf("invalid cipher string %q", data)
-	}
-	// TODO: do a single []byte allocation for all three
-	if s.IV, err = b64decode(parts[0]); err != nil {
+
+	s2, err := parsers[s.Type](parts)
+	if err != nil {
 		return err
 	}
-	if s.CT, err = b64decode(parts[1]); err != nil {
-		return err
-	}
-	if s.MAC, err = b64decode(parts[2]); err != nil {
-		return err
-	}
-	return nil
+
+	// hack for now:
+	s.Type = s2.Type
+	s.IV = s2.IV
+	s.MAC = s2.MAC
+	s.CT = s2.CT
+
+	return err
 }
 
 func b64decode(src []byte) ([]byte, error) {
@@ -162,6 +221,10 @@ func b64decode(src []byte) ([]byte, error) {
 	}
 	dst = dst[:n]
 	return dst, nil
+}
+
+func b64decodeStr(src string) ([]byte, error) {
+	return b64decode([]byte(src))
 }
 
 type Organization struct {
