@@ -6,6 +6,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -22,9 +23,91 @@ type SyncData struct {
 }
 
 type CipherString struct {
-	Type int
+	Type CipherStringType
 
 	IV, CT, MAC []byte
+}
+
+// taken from: https://github.com/bitwarden/jslib/blob/f30d6f8027055507abfdefd1eeb5d9aab25cc601/src/enums/encryptionType.ts
+//
+//export enum EncryptionType {
+//    AesCbc256_B64 = 0,
+//    AesCbc128_HmacSha256_B64 = 1,
+//    AesCbc256_HmacSha256_B64 = 2,
+//    Rsa2048_OaepSha256_B64 = 3,
+//    Rsa2048_OaepSha1_B64 = 4,
+//    Rsa2048_OaepSha256_HmacSha256_B64 = 5,
+//    Rsa2048_OaepSha1_HmacSha256_B64 = 6,
+//}
+type CipherStringType int
+
+const (
+	AesCbc256_B64 CipherStringType = 0
+	AesCbc128_HmacSha256_B64 CipherStringType = 1
+	AesCbc256_HmacSha256_B64 CipherStringType = 2
+	Rsa2048_OaepSha256_B64 CipherStringType = 3
+	Rsa2048_OaepSha1_B64 CipherStringType = 4
+	Rsa2048_OaepSha256_HmacSha256_B64 CipherStringType = 5
+	Rsa2048_OaepSha1_HmacSha256_B64 CipherStringType = 6
+)
+
+func CipherStringTypeParse(str string) (CipherStringType, error) {
+	val, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, err
+	}
+	switch val {
+	case 0: return AesCbc256_B64, nil
+	case 1: return AesCbc128_HmacSha256_B64, nil
+	case 2: return AesCbc256_HmacSha256_B64, nil
+	// TODO: implemented these:
+	//case 3: return Rsa2048_OaepSha256_B64, nil
+	//case 4: return Rsa2048_OaepSha1_B64, nil
+	//case 5: return Rsa2048_OaepSha256_HmacSha256_B64, nil
+	//case 6: return Rsa2048_OaepSha1_HmacSha256_B64, nil
+	default:
+		return 0, fmt.Errorf("unsupported cipherstringtype: %v", val)
+	}
+}
+
+type CipherStringTypeParserFunc func(parts []string) (*CipherString, error)
+
+var parsers = map[CipherStringType]CipherStringTypeParserFunc{
+	AesCbc256_B64: ParseAesCbc256_B64,
+	AesCbc128_HmacSha256_B64: ParseAesCbc128_HmacSha256_B64,
+	AesCbc256_HmacSha256_B64: ParseAesCbc256_HmacSha256_B64,
+}
+
+func ParseAesCbc256_HmacSha256_B64(parts []string) (*CipherString, error) {
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("can not parse: %v", parts)
+	}
+}
+
+func ParseAesCbc128_HmacSha256_B64(parts []string) (*CipherString, error) {
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("can not parse: %v", parts)
+	}
+}
+
+func ParseAesCbc256_B64(parts []string) (*CipherString, error) {
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("can not parse: %v", parts)
+	}
+
+}
+
+func (i CipherStringType) String() string {
+	switch i {
+	case AesCbc256_B64: return "AesCbc256_B64"
+	case AesCbc128_HmacSha256_B64: return "AesCbc128_HmacSha256_B64"
+	case AesCbc256_HmacSha256_B64: return "AesCbc256_HmacSha256_B64"
+	case Rsa2048_OaepSha256_B64: return "Rsa2048_OaepSha256_B64"
+	case Rsa2048_OaepSha1_B64: return "Rsa2048_OaepSha1_B64"
+	case Rsa2048_OaepSha256_HmacSha256_B64: return "Rsa2048_OaepSha256_HmacSha256_B64"
+	case Rsa2048_OaepSha1_HmacSha256_B64: return "Rsa2048_OaepSha1_HmacSha256_B64"
+	default: return "unknown"
+	}
 }
 
 func (s CipherString) MarshalText() ([]byte, error) {
@@ -49,7 +132,7 @@ func (s *CipherString) UnmarshalText(data []byte) error {
 	}
 	typStr := string(data[:i])
 	var err error
-	if s.Type, err = strconv.Atoi(typStr); err != nil {
+	if s.Type, err = CipherStringTypeParse(typStr); err != nil {
 		return fmt.Errorf("invalid cipher type %q", typStr)
 	}
 	data = data[i+1:]
