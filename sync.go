@@ -22,14 +22,35 @@ type SyncData struct {
 }
 
 type CipherString struct {
-	Type int
+	Type CipherStringType
 
 	IV, CT, MAC []byte
 }
 
+type CipherStringType int
+
+// Taken from https://github.com/bitwarden/jslib/blob/f30d6f8027055507abfdefd1eeb5d9aab25cc601/src/enums/encryptionType.ts
+const (
+	AesCbc256_B64                     CipherStringType = 0
+	AesCbc128_HmacSha256_B64          CipherStringType = 1
+	AesCbc256_HmacSha256_B64          CipherStringType = 2
+	Rsa2048_OaepSha256_B64            CipherStringType = 3
+	Rsa2048_OaepSha1_B64              CipherStringType = 4
+	Rsa2048_OaepSha256_HmacSha256_B64 CipherStringType = 5
+	Rsa2048_OaepSha1_HmacSha256_B64   CipherStringType = 6
+)
+
+func (t CipherStringType) HasMAC() bool {
+	return t != AesCbc256_B64
+}
+
 func (s CipherString) MarshalText() ([]byte, error) {
-	if s.Type == 0 {
-		return nil, nil
+	if !s.Type.HasMAC() {
+		return []byte(fmt.Sprintf("%d.%s|%s",
+			s.Type,
+			b64enc.EncodeToString(s.IV),
+			b64enc.EncodeToString(s.CT),
+		)), nil
 	}
 	return []byte(fmt.Sprintf("%d.%s|%s|%s",
 		s.Type,
@@ -45,28 +66,42 @@ func (s *CipherString) UnmarshalText(data []byte) error {
 	}
 	i := bytes.IndexByte(data, '.')
 	if i < 0 {
-		return fmt.Errorf("invalid cipher string %q", data)
+		return fmt.Errorf("cipher string does not contain a type: %q", data)
 	}
 	typStr := string(data[:i])
 	var err error
-	if s.Type, err = strconv.Atoi(typStr); err != nil {
-		return fmt.Errorf("invalid cipher type %q", typStr)
+	if t, err := strconv.Atoi(typStr); err != nil {
+		return fmt.Errorf("invalid cipher string type: %q", typStr)
+	} else {
+		s.Type = CipherStringType(t)
 	}
-	data = data[i+1:]
+	switch s.Type {
+	case AesCbc128_HmacSha256_B64, AesCbc256_HmacSha256_B64, AesCbc256_B64:
+	default:
+		return fmt.Errorf("unsupported cipher string type: %d", s.Type)
+	}
 
+	data = data[i+1:]
 	parts := bytes.Split(data, []byte("|"))
-	if len(parts) != 3 {
-		return fmt.Errorf("invalid cipher string %q", data)
+	wantParts := 3
+	if !s.Type.HasMAC() {
+		wantParts = 2
 	}
-	// TODO: do a single []byte allocation for all three
+	if len(parts) != wantParts {
+		return fmt.Errorf("cipher string type requires %d parts: %q", wantParts, data)
+	}
+
+	// TODO: do a single []byte allocation for all fields
 	if s.IV, err = b64decode(parts[0]); err != nil {
 		return err
 	}
 	if s.CT, err = b64decode(parts[1]); err != nil {
 		return err
 	}
-	if s.MAC, err = b64decode(parts[2]); err != nil {
-		return err
+	if s.Type.HasMAC() {
+		if s.MAC, err = b64decode(parts[2]); err != nil {
+			return err
+		}
 	}
 	return nil
 }
