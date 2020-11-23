@@ -235,8 +235,9 @@ func run(args ...string) (err error) {
 		}
 	}
 
-	if err := loadDataFile(filepath.Join(dir, "data.json")); err != nil {
-		return err
+	dataPath := filepath.Join(dir, "data.json")
+	if err := loadDataFile(dataPath); err != nil {
+		return fmt.Errorf("could not load %s: %v", dataPath, err)
 	}
 
 	if args[0] == "config" {
