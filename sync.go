@@ -131,28 +131,31 @@ type Domains struct {
 type GlobalEquivalentDomains struct {
 	Type     int
 	Domains  []string
-	Excluded bool
+	Excluded bool `json:",omitempty"`
 }
 
 type Cipher struct {
-	Type                CipherType
-	FolderID            uuid.UUID
-	OrganizationID      uuid.UUID
-	Favorite            bool
-	Edit                bool
-	ID                  uuid.UUID
-	Attachments         interface{} // TODO
-	OrganizationUseTotp bool
-	RevisionDate        time.Time
-	CollectionIDs       []string
+	Type         CipherType
+	ID           uuid.UUID
+	Name         CipherString
+	Edit         bool
+	RevisionDate time.Time
 
-	Card       Card
-	Fields     []Field
-	Identity   Identity
-	Login      Login
-	Name       CipherString
-	Notes      CipherString
-	SecureNote SecureNote
+	// The rest of the fields are optional. Omit from the JSON if empty.
+
+	FolderID            *uuid.UUID  `json:",omitempty"`
+	OrganizationID      *uuid.UUID  `json:",omitempty"`
+	Favorite            bool        `json:",omitempty"`
+	Attachments         interface{} `json:",omitempty"`
+	OrganizationUseTotp bool        `json:",omitempty"`
+	CollectionIDs       []string    `json:",omitempty"`
+	Fields              []Field     `json:",omitempty"`
+
+	Card       *Card         `json:",omitempty"`
+	Identity   *Identity     `json:",omitempty"`
+	Login      *Login        `json:",omitempty"`
+	Notes      *CipherString `json:",omitempty"`
+	SecureNote *SecureNote   `json:",omitempty"`
 }
 
 type CipherType int
@@ -227,10 +230,10 @@ type FieldType int
 
 type Login struct {
 	Password CipherString
-	Totp     string
 	URI      CipherString
 	URIs     []URI
-	Username CipherString
+	Username CipherString `json:",omitempty"`
+	Totp     string       `json:",omitempty"`
 }
 
 type URI struct {
