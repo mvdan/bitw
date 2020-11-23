@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -36,7 +35,7 @@ type tokLoginResponse struct {
 }
 
 type twoFactorResponse struct {
-	TwoFactorProviders []int
+	TwoFactorProviders []string
 }
 
 func login(ctx context.Context) error {
@@ -99,7 +98,7 @@ func login(ctx context.Context) error {
 			return err
 		}
 		values.Set("twoFactorToken", string(tfaToken))
-		values.Set("twoFactorProvider", strconv.Itoa(provider))
+		values.Set("twoFactorProvider", provider)
 		values.Set("twoFactorRemember", "1")
 		tokLogin = tokLoginResponse{}
 		if err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values); err != nil {
