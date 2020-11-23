@@ -25,7 +25,7 @@ import (
 	"github.com/kenshaw/ini"
 	"golang.org/x/crypto/hkdf"
 	"golang.org/x/crypto/pbkdf2"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 var flagSet = flag.NewFlagSet("bitw", flag.ContinueOnError)
@@ -101,7 +101,7 @@ func ensurePassword() error {
 	return err
 }
 
-// readLine is similar to terminal.ReadPassword, but it doesn't use key codes.
+// readLine is similar to term.ReadPassword, but it doesn't use key codes.
 func readLine(r io.Reader) ([]byte, error) {
 	var buf [1]byte
 	var line []byte
@@ -131,9 +131,9 @@ func prompt(line string) ([]byte, error) {
 
 	fd := int(os.Stdin.Fd())
 	switch {
-	case terminal.IsTerminal(fd):
+	case term.IsTerminal(fd):
 		fmt.Printf("%s: ", line)
-		password, err := terminal.ReadPassword(fd)
+		password, err := term.ReadPassword(fd)
 		fmt.Println()
 		if err == nil && len(password) == 0 {
 			err = io.ErrUnexpectedEOF
