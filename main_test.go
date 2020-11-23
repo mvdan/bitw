@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 			// If we get a 429, succeed and write a special empty
 			// file, so that the test can be skipped.
 			if strings.Contains(s, "Too Many Requests:") {
-				if err := ioutil.WriteFile("toomany", nil, 0600); err != nil {
+				if err := ioutil.WriteFile("toomany", nil, 0o600); err != nil {
 					fmt.Println(err)
 				}
 				return 0
@@ -83,7 +83,7 @@ func TestMain(m *testing.M) {
 				fmt.Println(err)
 				return 1
 			}
-			if err := ioutil.WriteFile(dst, out, 0600); err != nil {
+			if err := ioutil.WriteFile(dst, out, 0o600); err != nil {
 				fmt.Println(err)
 				return 1
 			}
@@ -117,7 +117,7 @@ func TestScripts(t *testing.T) {
 
 			cfgDir := filepath.Join(home, "config")
 			env.Vars = append(env.Vars, "CONFIG_DIR="+cfgDir)
-			if err := os.MkdirAll(cfgDir, 0755); err != nil {
+			if err := os.MkdirAll(cfgDir, 0o755); err != nil {
 				return err
 			}
 
@@ -133,12 +133,12 @@ func TestScripts(t *testing.T) {
 			}
 
 			path := filepath.Join(cfgDir, "data.json")
-			if err := ioutil.WriteFile(path, baseData, 0600); err != nil {
+			if err := ioutil.WriteFile(path, baseData, 0o600); err != nil {
 				return err
 			}
 
 			path = filepath.Join(cfgDir, "data-notfa.json")
-			if err := ioutil.WriteFile(path, savedData, 0600); err != nil {
+			if err := ioutil.WriteFile(path, savedData, 0o600); err != nil {
 				return err
 			}
 			return nil

@@ -188,10 +188,10 @@ func (f *dataFile) Save() error {
 		return err
 	}
 	bs = append(bs, '\n')
-	if err := os.MkdirAll(filepath.Dir(f.path), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(f.path), 0o755); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(f.path, bs, 0600)
+	return ioutil.WriteFile(f.path, bs, 0o600)
 }
 
 func run(args ...string) (err error) {
