@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/knq/ini"
+	"github.com/kenshaw/ini"
 	"golang.org/x/crypto/hkdf"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/ssh/terminal"
