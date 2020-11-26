@@ -39,7 +39,7 @@ These features are not planned at the moment:
 Talking to BitWarden:
 
 * https://github.com/jcs/rubywarden/blob/master/API.md
-* https://fossil.birl.ca/bitwarden-cli/doc/trunk/docs/build/html/crypto.html
+* https://fossil.birl.ca/doc/trunk/docs/build/html/crypto.html
 
 Integrating with the OS:
 
