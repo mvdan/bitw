@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"os"
 	"path"
 
 	"github.com/godbus/dbus/v5"
@@ -68,7 +69,7 @@ func serveDBus(ctx context.Context) error {
 		return errAlreadyTaken
 	}
 
-	fmt.Printf("Listening on %s\n", dbusName)
+	fmt.Fprintf(os.Stderr, "Listening on %s\n", dbusName)
 	<-ctx.Done()
 	conn.Close()
 	return ctx.Err()

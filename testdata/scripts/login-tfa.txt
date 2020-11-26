@@ -15,11 +15,22 @@ env EMAIL=testwithtfa@mvdan.cc
 env PASSWORD=$PASSWORD_WITHTFA
 env FORCE_STDIN_PROMPTS=true
 
-2fa $TFAKEY tfatoken
+# Check invalid 2fa method selections.
 
-stdin tfatoken
+stdin badprovider.stdin
+! bitw login
+cmp stderr badprovider.stderr
+#stop
+
+# Now do a correct 2fa login.
+# Note that success.stdin will also select the "0" provider.
+
+2fa $TFAKEY success.stdin
+
+stdin success.stdin
 bitw login
 [file:toomany] skip 'too many two-factor auth requests, try again later'
+cmp stderr success.stderr
 
 grep AccessToken $CONFIG_DIR/data.json
 ! grep '"Name": "Test With TFA",' $CONFIG_DIR/data.json
@@ -38,12 +49,24 @@ grep '"Email": "testwithtfa@mvdan.cc",' $CONFIG_DIR/data.json
 
 env PASSWORD=$PASSWORD_WITHTFA
 
-stdin badtoken
+stdin badtoken.stdin
 ! bitw login
 [file:toomany] skip 'too many two-factor auth requests, try again later'
 stderr 'could not login via two-factor'
 stderr 'Two-step token is invalid'
 
-
--- badtoken --
+-- badprovider.stdin --
+33
+-- badprovider.stderr --
+1) Six-digit authenticator token
+2) Six-digit email token (te*********@mvdan.cc)
+Select a two-factor auth provider [1-2]: 
+error: could not obtain two-factor auth token: selected option 33 is not within the range [1-2]
+-- badtoken.stdin --
+1
 12345678
+-- success.stderr --
+1) Six-digit authenticator token
+2) Six-digit email token (te*********@mvdan.cc)
+Select a two-factor auth provider [1-2]: 
+Six-digit authenticator token: 

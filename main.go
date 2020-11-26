@@ -97,16 +97,19 @@ func ensurePassword() error {
 		return nil
 	}
 	var err error
-	password, err = prompt("Password")
+	password, err = passwordPrompt("Password")
 	return err
 }
 
 // readLine is similar to term.ReadPassword, but it doesn't use key codes.
-func readLine(r io.Reader) ([]byte, error) {
+func readLine(prompt string) ([]byte, error) {
+	fmt.Fprintf(os.Stderr, "%s: ", prompt)
+	defer fmt.Fprintln(os.Stderr)
+
 	var buf [1]byte
 	var line []byte
 	for {
-		n, err := r.Read(buf[:])
+		n, err := os.Stdin.Read(buf[:])
 		if n > 0 {
 			switch buf[0] {
 			case '\n', '\r':
@@ -123,7 +126,7 @@ func readLine(r io.Reader) ([]byte, error) {
 	}
 }
 
-func prompt(line string) ([]byte, error) {
+func passwordPrompt(prompt string) ([]byte, error) {
 	// TODO: Support cancellation with ^C. Currently not possible in any
 	// simple way. Closing os.Stdin on cancel doesn't seem to do the trick
 	// either. Simply doing an os.Exit keeps the terminal broken because of
@@ -132,15 +135,15 @@ func prompt(line string) ([]byte, error) {
 	fd := int(os.Stdin.Fd())
 	switch {
 	case term.IsTerminal(fd):
-		fmt.Printf("%s: ", line)
+		fmt.Fprintf(os.Stderr, "%s: ", prompt)
 		password, err := term.ReadPassword(fd)
-		fmt.Println()
+		fmt.Fprintln(os.Stderr)
 		if err == nil && len(password) == 0 {
 			err = io.ErrUnexpectedEOF
 		}
 		return password, err
 	case os.Getenv("FORCE_STDIN_PROMPTS") == "true":
-		return readLine(os.Stdin)
+		return readLine(prompt)
 	default:
 		return nil, fmt.Errorf("need a terminal to prompt for a password")
 	}

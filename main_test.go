@@ -83,6 +83,8 @@ func TestMain(m *testing.M) {
 				fmt.Println(err)
 				return 1
 			}
+			// Select the first 2fa method, "authenticator".
+			out = append([]byte("1\n"), out...)
 			if err := ioutil.WriteFile(dst, out, 0o600); err != nil {
 				fmt.Println(err)
 				return 1
