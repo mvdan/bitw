@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -34,6 +35,28 @@ type tokLoginResponse struct {
 	TokenType    string `json:"token_type"`
 	RefreshToken string `json:"refresh_token"`
 	Key          string `json:"key"`
+}
+
+const (
+	// deviceName should probably be like "Linux", "Android", etc, but this
+	// helps the human user differentiate bitw logins from those made by the
+	// official clients.
+	deviceName = "bitw"
+	loginScope = "api offline_access"
+)
+
+func deviceType() string {
+	// The enum strings come from https://github.com/bitwarden/server/blob/b19628c6f85a2cd5f1950ac222ba14840a88894d/src/Core/Enums/DeviceType.cs.
+	switch runtime.GOOS {
+	case "linux":
+		return "8" // Linux Desktop
+	case "darwin":
+		return "7" // MacOS Desktop
+	case "windows":
+		return "6" // Windows Desktop
+	default:
+		return "14" // Unknown Browser, since we don't have a better fallback
+	}
 }
 
 func login(ctx context.Context) error {
@@ -76,9 +99,9 @@ func login(ctx context.Context) error {
 		"password", string(hashedPassword),
 		"scope", loginScope,
 		"client_id", "connector", // seen in bitwarden/jslib
-		"deviceType", deviceType,
-		"deviceIdentifier", data.DeviceID,
+		"deviceType", deviceType(),
 		"deviceName", deviceName,
+		"deviceIdentifier", data.DeviceID,
 	)
 	err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values)
 	errsc, ok := err.(*errStatusCode)

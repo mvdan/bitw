@@ -70,12 +70,6 @@ func main1(stderr io.Writer) int {
 	return 0
 }
 
-const (
-	deviceName = "firefox"
-	deviceType = "3" // bitwarden's device type for FireFox
-	loginScope = "api offline_access"
-)
-
 // These can be overriden by the config.
 var (
 	apiURL = "https://api.bitwarden.com"
