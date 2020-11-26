@@ -44,20 +44,28 @@ func (t CipherStringType) HasMAC() bool {
 	return t != AesCbc256_B64
 }
 
+func (s CipherString) IsZero() bool {
+	return s.Type == 0 && s.IV == nil && s.CT == nil && s.MAC == nil
+}
+
 func (s CipherString) MarshalText() ([]byte, error) {
+	return []byte(s.String()), nil
+}
+
+func (s CipherString) String() string {
 	if !s.Type.HasMAC() {
-		return []byte(fmt.Sprintf("%d.%s|%s",
+		return fmt.Sprintf("%d.%s|%s",
 			s.Type,
 			b64enc.EncodeToString(s.IV),
 			b64enc.EncodeToString(s.CT),
-		)), nil
+		)
 	}
-	return []byte(fmt.Sprintf("%d.%s|%s|%s",
+	return fmt.Sprintf("%d.%s|%s|%s",
 		s.Type,
 		b64enc.EncodeToString(s.IV),
 		b64enc.EncodeToString(s.CT),
 		b64enc.EncodeToString(s.MAC),
-	)), nil
+	)
 }
 
 func (s *CipherString) UnmarshalText(data []byte) error {
@@ -242,9 +250,9 @@ func (c *Cipher) Match(attr, value string) bool {
 	case "id":
 		got = c.ID.String()
 	case "name":
-		got, err = decryptStr(c.Name)
+		got, err = secrets.decryptStr(c.Name)
 	case "username":
-		got, err = decryptStr(c.Login.Username)
+		got, err = secrets.decryptStr(c.Login.Username)
 	default:
 		return false
 	}
@@ -286,10 +294,10 @@ type SecureNoteType int
 
 func sync(ctx context.Context) error {
 	now := time.Now().UTC()
-	if err := jsonGET(ctx, apiURL+"/sync", &data.Sync); err != nil {
+	if err := jsonGET(ctx, apiURL+"/sync", &globalData.Sync); err != nil {
 		return fmt.Errorf("could not sync: %v", err)
 	}
-	data.LastSync = now
+	globalData.LastSync = now
 	saveData = true
 	return nil
 }

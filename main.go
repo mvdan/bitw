@@ -5,10 +5,6 @@ package main
 
 import (
 	"context"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/hmac"
-	"crypto/sha256"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -17,14 +13,11 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"text/tabwriter"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/kenshaw/ini"
-	"golang.org/x/crypto/hkdf"
-	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/term"
 )
 
@@ -74,26 +67,7 @@ func main1(stderr io.Writer) int {
 var (
 	apiURL = "https://api.bitwarden.com"
 	idtURL = "https://identity.bitwarden.com"
-
-	email = os.Getenv("EMAIL")
-
-	// TODO: make these more secure
-	password    []byte
-	key, macKey []byte
 )
-
-func ensurePassword() error {
-	if len(password) > 0 {
-		return nil
-	}
-	if s := os.Getenv("PASSWORD"); s != "" {
-		password = []byte(s)
-		return nil
-	}
-	var err error
-	password, err = passwordPrompt("Password")
-	return err
-}
 
 // readLine is similar to term.ReadPassword, but it doesn't use key codes.
 func readLine(prompt string) ([]byte, error) {
@@ -144,11 +118,15 @@ func passwordPrompt(prompt string) ([]byte, error) {
 }
 
 var (
-	config *ini.File
-	data   dataFile
+	config     *ini.File
+	globalData dataFile
 
 	saveData bool
+
+	secrets secretCache
 )
+
+func init() { secrets.data = &globalData }
 
 type dataFile struct {
 	path string
@@ -165,7 +143,7 @@ type dataFile struct {
 }
 
 func loadDataFile(path string) error {
-	data.path = path
+	globalData.path = path
 	f, err := os.Open(path)
 	if os.IsNotExist(err) {
 		return nil
@@ -173,7 +151,7 @@ func loadDataFile(path string) error {
 		return err
 	}
 	defer f.Close()
-	if err := json.NewDecoder(f).Decode(&data); err != nil {
+	if err := json.NewDecoder(f).Decode(&globalData); err != nil {
 		return err
 	}
 	return nil
@@ -221,7 +199,7 @@ func run(args ...string) (err error) {
 			// note that these are lowercased
 			switch key {
 			case "email":
-				email = section.Get(key)
+				secrets._configEmail = section.Get(key)
 			case "apiurl":
 				apiURL = section.Get(key)
 			case "identityurl":
@@ -238,7 +216,7 @@ func run(args ...string) (err error) {
 	}
 
 	if args[0] == "config" {
-		fmt.Printf("email       = %q\n", email)
+		fmt.Printf("email       = %q\n", secrets.email())
 		fmt.Printf("apiURL      = %q\n", apiURL)
 		fmt.Printf("identityURL = %q\n", idtURL)
 		return nil
@@ -248,13 +226,13 @@ func run(args ...string) (err error) {
 		if !saveData {
 			return
 		}
-		if err1 := data.Save(); err == nil {
+		if err1 := globalData.Save(); err == nil {
 			err = err1
 		}
 	}()
 
-	if data.DeviceID == "" {
-		data.DeviceID = uuid.New().String()
+	if globalData.DeviceID == "" {
+		globalData.DeviceID = uuid.New().String()
 		saveData = true
 	}
 
@@ -268,7 +246,7 @@ func run(args ...string) (err error) {
 		cancel()
 	}()
 
-	ctx = context.WithValue(ctx, authToken{}, data.AccessToken)
+	ctx = context.WithValue(ctx, authToken{}, globalData.AccessToken)
 	switch args[0] {
 	case "login":
 		if err := login(ctx); err != nil {
@@ -284,14 +262,14 @@ func run(args ...string) (err error) {
 	case "dump":
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.AlignRight)
 		fmt.Fprintln(w, "name\turi\tusername\tpassword\t")
-		for _, cipher := range data.Sync.Ciphers {
+		for _, cipher := range globalData.Sync.Ciphers {
 			for _, cipherStr := range [...]CipherString{
 				cipher.Name,
 				cipher.Login.URI,
 				cipher.Login.Username,
 				cipher.Login.Password,
 			} {
-				s, err := decrypt(cipherStr)
+				s, err := secrets.decrypt(cipherStr)
 				if err != nil {
 					return err
 				}
@@ -313,110 +291,14 @@ func run(args ...string) (err error) {
 }
 
 func ensureToken(ctx context.Context) error {
-	if data.RefreshToken == "" {
+	if globalData.RefreshToken == "" {
 		if err := login(ctx); err != nil {
 			return err
 		}
-	} else if time.Now().After(data.TokenExpiry) {
+	} else if time.Now().After(globalData.TokenExpiry) {
 		if err := refreshToken(ctx); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func ensureDecryptKey() error {
-	if len(key) > 0 {
-		return nil
-	}
-	if email == "" {
-		// If the user specified $EMAIL just for the login, grab it from
-		// the data file now.
-		email = data.Sync.Profile.Email
-	}
-	if err := ensurePassword(); err != nil {
-		return err
-	}
-	masterKey := pbkdf2.Key(password, []byte(strings.ToLower(email)),
-		data.KDFIterations, 32, sha256.New)
-
-	// We decrypt the decryption key from the synced data, using the key
-	// resulting from stretching masterKey. The keys will be overwritten
-	// once we decrypt the final ones.
-	key, macKey = stretchKey(masterKey)
-
-	s, err := decrypt(data.Sync.Profile.Key)
-	if err != nil {
-		return err
-	}
-	key, macKey = s[:32], s[32:64]
-	return nil
-}
-
-func stretchKey(orig []byte) (key, macKey []byte) {
-	key = make([]byte, 32)
-	macKey = make([]byte, 32)
-	var r io.Reader
-	r = hkdf.Expand(sha256.New, orig, []byte("enc"))
-	r.Read(key)
-	r = hkdf.Expand(sha256.New, orig, []byte("mac"))
-	r.Read(macKey)
-	return key, macKey
-}
-
-func decryptStr(s CipherString) (string, error) {
-	dec, err := decrypt(s)
-	if err != nil {
-		return "", err
-	}
-	return string(dec), nil
-}
-
-// TODO: turn this into a method
-
-func decrypt(s CipherString) ([]byte, error) {
-	if s.Type == 0 {
-		return nil, nil
-	}
-	if err := ensureDecryptKey(); err != nil {
-		return nil, err
-	}
-	c, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-
-	switch s.Type {
-	case 2:
-		// AES-CBC-256, HMAC-SHA256, base-64; continues below
-	default:
-		return nil, fmt.Errorf("unsupported cipher type %q", s.Type)
-	}
-
-	if macKey != nil {
-		var msg []byte
-		msg = append(msg, s.IV...)
-		msg = append(msg, s.CT...)
-		if !validMAC(msg, s.MAC, macKey) {
-			return nil, fmt.Errorf("MAC mismatch")
-		}
-	}
-
-	decrypter := cipher.NewCBCDecrypter(c, s.IV)
-	dst := make([]byte, len(s.CT))
-	decrypter.CryptBlocks(dst, s.CT)
-	dst = unpad(dst)
-	return dst, nil
-}
-
-func unpad(src []byte) []byte {
-	n := src[len(src)-1]
-	return src[:len(src)-int(n)]
-}
-
-func validMAC(message, messageMAC, key []byte) bool {
-	mac := hmac.New(sha256.New, key)
-	mac.Write(message)
-	expectedMAC := mac.Sum(nil)
-	return hmac.Equal(messageMAC, expectedMAC)
 }

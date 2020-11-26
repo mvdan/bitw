@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/atotto/clipboard v0.1.2 // indirect
+	github.com/frankban/quicktest v1.11.2
 	github.com/godbus/dbus/v5 v5.0.3
 	github.com/google/uuid v1.1.2
 	github.com/kenshaw/ini v0.5.0

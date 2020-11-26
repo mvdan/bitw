@@ -14,7 +14,6 @@ import (
 	"os"
 	"runtime"
 	"strconv"
-	"strings"
 	"time"
 
 	"golang.org/x/crypto/pbkdf2"
@@ -60,6 +59,7 @@ func deviceType() string {
 }
 
 func login(ctx context.Context) error {
+	email := secrets.email()
 	if email == "" {
 		return fmt.Errorf("need a configured email or $EMAIL to log in")
 	}
@@ -70,18 +70,18 @@ func login(ctx context.Context) error {
 	}); err != nil {
 		return fmt.Errorf("could not pre-login: %v", err)
 	}
-	data.KDF = preLogin.KDF
-	data.KDFIterations = preLogin.KDFIterations
+	globalData.KDF = preLogin.KDF
+	globalData.KDFIterations = preLogin.KDFIterations
 	saveData = true
 
-	if err := ensurePassword(); err != nil {
+	password, err := secrets.password()
+	if err != nil {
 		return err
 	}
 
 	// First, we create the master key, with the password, the lowercase
 	// email as salt, and the number of iterations the server told us.
-	masterKey := pbkdf2.Key(password, []byte(strings.ToLower(email)),
-		preLogin.KDFIterations, 32, sha256.New)
+	masterKey := deriveMasterKey(password, email, preLogin.KDFIterations)
 
 	// Then we create the hashed password, with the master key as password,
 	// the password as hash, and just one iteration.
@@ -101,9 +101,9 @@ func login(ctx context.Context) error {
 		"client_id", "connector", // seen in bitwarden/jslib
 		"deviceType", deviceType(),
 		"deviceName", deviceName,
-		"deviceIdentifier", data.DeviceID,
+		"deviceIdentifier", globalData.DeviceID,
 	)
-	err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values)
+	err = jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values)
 	errsc, ok := err.(*errStatusCode)
 	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
 		var twoFactor twoFactorResponse
@@ -124,9 +124,9 @@ func login(ctx context.Context) error {
 	} else if err != nil {
 		return fmt.Errorf("could not login via password: %v", err)
 	}
-	data.AccessToken = tokLogin.AccessToken
-	data.RefreshToken = tokLogin.RefreshToken
-	data.TokenExpiry = now.Add(time.Duration(tokLogin.ExpiresIn) * time.Second)
+	globalData.AccessToken = tokLogin.AccessToken
+	globalData.RefreshToken = tokLogin.RefreshToken
+	globalData.TokenExpiry = now.Add(time.Duration(tokLogin.ExpiresIn) * time.Second)
 	saveData = true
 	return nil
 }

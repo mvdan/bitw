@@ -89,7 +89,7 @@ func (d *dbusService) OpenSession(algo string, input dbus.Variant) (output dbus.
 
 func (d *dbusService) SearchItems(attributes map[string]string) (unlocked, locked []dbus.ObjectPath, _ *dbus.Error) {
 Ciphers:
-	for _, cipher := range data.Sync.Ciphers {
+	for _, cipher := range globalData.Sync.Ciphers {
 		for attr, value := range attributes {
 			if !cipher.Match(attr, value) {
 				continue Ciphers
@@ -104,7 +104,7 @@ Ciphers:
 
 func (d *dbusService) secretByPath(item dbus.ObjectPath) (Cipher, bool) {
 	id := path.Base(string(item))
-	for _, cipher := range data.Sync.Ciphers {
+	for _, cipher := range globalData.Sync.Ciphers {
 		if rawUUID(cipher.ID) == id {
 			return cipher, true
 		}
@@ -138,7 +138,7 @@ func (d *dbusService) GetAll(msg dbus.Message, iface string) (map[string]dbus.Va
 		if !ok {
 			return nil, errNoSuchObject
 		}
-		name, err := decryptStr(cipher.Name)
+		name, err := secrets.decryptStr(cipher.Name)
 		if err != nil {
 			return nil, dbusErrorf("%s", err)
 		}
@@ -159,7 +159,7 @@ func (d *dbusService) GetSecret(msg dbus.Message, session dbus.ObjectPath) (secr
 	if !ok {
 		return secret, errNoSuchObject
 	}
-	password, err := decrypt(cipher.Login.Password)
+	password, err := secrets.decrypt(cipher.Login.Password)
 	if err != nil {
 		return secret, dbusErrorf("%s", err)
 	}
@@ -170,18 +170,18 @@ func (d *dbusService) GetSecret(msg dbus.Message, session dbus.ObjectPath) (secr
 	}, nil
 }
 
-func (d *dbusService) GetSecrets(items []dbus.ObjectPath, session dbus.ObjectPath) (secrets map[dbus.ObjectPath]dbusSecret, _ *dbus.Error) {
-	secrets = make(map[dbus.ObjectPath]dbusSecret)
+func (d *dbusService) GetSecrets(items []dbus.ObjectPath, session dbus.ObjectPath) (byPath map[dbus.ObjectPath]dbusSecret, _ *dbus.Error) {
+	byPath = make(map[dbus.ObjectPath]dbusSecret)
 	for _, item := range items {
 		cipher, ok := d.secretByPath(item)
 		if !ok {
 			return nil, errNoSuchObject
 		}
-		password, err := decrypt(cipher.Login.Password)
+		password, err := secrets.decrypt(cipher.Login.Password)
 		if err != nil {
 			return nil, dbusErrorf("%s", err)
 		}
-		secrets[item] = dbusSecret{
+		byPath[item] = dbusSecret{
 			Session:     session,
 			Value:       password,
 			ContentType: "text/plain",
