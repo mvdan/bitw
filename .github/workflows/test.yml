@@ -5,22 +5,22 @@ jobs:
     strategy:
       matrix:
         # Test on fewer Go versions to avoid bitwarden.com rate limits.
-        # go-version: [1.13.x, 1.14.x]
-        go-version: [1.14.x]
+        # go-version: [1.14.x, 1.15.x]
+        go-version: [1.15.x]
         # Since the PATH hack below doesn't work on Windows.
-        # platform: [ubuntu-latest, macos-latest, windows-latest]
-        platform: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.platform }}
+        # os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Install Go
-      uses: actions/setup-go@v1
+      uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Install Linux deps
-      if: matrix.platform == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest'
       run: sudo apt update && sudo apt install -y --no-install-recommends dbus libsecret-tools
     - name: Install portable deps
       run: go install rsc.io/2fa
