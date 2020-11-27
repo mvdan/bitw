@@ -115,9 +115,7 @@ func TestScripts(t *testing.T) {
 	t.Parallel()
 
 	testdata, err := filepath.Abs("testdata")
-	if err != nil {
-		t.Fatal(err)
-	}
+	qt.Assert(t, err, qt.IsNil)
 
 	// Don't stop on an error, to let a test write to the path. The test
 	// needing the file can skip itself.
