@@ -59,6 +59,13 @@ func (c *secretCache) password() ([]byte, error) {
 }
 
 func (c *secretCache) initKeys() error {
+	keyCipher := c.data.Sync.Profile.Key
+	switch keyCipher.Type {
+	case AesCbc256_B64, AesCbc256_HmacSha256_B64:
+	default:
+		return fmt.Errorf("unsupported key cipher type %q", keyCipher.Type)
+	}
+
 	email := c.email()
 	if email == "" {
 		return fmt.Errorf("need a configured email or $EMAIL to decrypt data")
@@ -70,16 +77,47 @@ func (c *secretCache) initKeys() error {
 
 	masterKey := deriveMasterKey(password, email, c.data.KDFIterations)
 
-	// We decrypt the decryption key from the synced data, using the key
-	// resulting from stretching masterKey. The keys are discarded once we
-	// decrypt the final ones.
-	key, macKey := stretchKey(masterKey)
+	// This bit of code can help create a random key and encrypt it with a
+	// given email/password. Useful for creating test data for TestCipherString.
+	// rnd := make([]byte, 32) // or 64 to include a mac key
+	// if _, err := io.ReadFull(rand.Reader, rnd); err != nil {
+	// 	return err
+	// }
+	// // use "key, macKey := stretchKey(masterKey)" for a Hmac cipher type
+	// k, err := encryptWith(rnd, AesCbc256_B64, masterKey, nil)
+	// if err != nil {
+	// 	return err
+	// }
+	// println(k.String())
 
-	finalKey, err := decryptWith(c.data.Sync.Profile.Key, key, macKey)
-	if err != nil {
-		return err
+	var finalKey []byte
+	switch keyCipher.Type {
+	case AesCbc256_B64:
+		finalKey, err = decryptWith(keyCipher, masterKey, nil)
+		if err != nil {
+			return err
+		}
+	case AesCbc256_HmacSha256_B64:
+		// We decrypt the decryption key from the synced data, using the key
+		// resulting from stretching masterKey. The keys are discarded once we
+		// obtain the final ones.
+		key, macKey := stretchKey(masterKey)
+
+		finalKey, err = decryptWith(keyCipher, key, macKey)
+		if err != nil {
+			return err
+		}
 	}
-	c.key, c.macKey = finalKey[:32], finalKey[32:64]
+
+	switch len(finalKey) {
+	case 32:
+		c.key = finalKey
+	case 64:
+		c.key, c.macKey = finalKey[:32], finalKey[32:64]
+	default:
+		return fmt.Errorf("invalid key length: %d", len(finalKey))
+	}
+
 	return nil
 }
 
@@ -123,18 +161,21 @@ func decryptWith(s CipherString, key, macKey []byte) ([]byte, error) {
 	}
 
 	switch s.Type {
-	case AesCbc256_HmacSha256_B64:
+	case AesCbc256_B64, AesCbc256_HmacSha256_B64:
 		// continues below
 	default:
-		return nil, fmt.Errorf("unsupported cipher type %q", s.Type)
+		return nil, fmt.Errorf("decrypt: unsupported cipher type %q", s.Type)
 	}
 
-	if macKey != nil {
+	if s.Type == AesCbc256_HmacSha256_B64 {
+		if len(s.MAC) == 0 || len(macKey) == 0 {
+			return nil, fmt.Errorf("decrypt: cipher string type expects a MAC")
+		}
 		var msg []byte
 		msg = append(msg, s.IV...)
 		msg = append(msg, s.CT...)
 		if !validMAC(msg, s.MAC, macKey) {
-			return nil, fmt.Errorf("MAC mismatch")
+			return nil, fmt.Errorf("decrypt: MAC mismatch")
 		}
 	}
 
@@ -149,17 +190,31 @@ func decryptWith(s CipherString, key, macKey []byte) ([]byte, error) {
 }
 
 func (c *secretCache) encrypt(data []byte) (CipherString, error) {
-	s := CipherString{}
+	// Same default as vault.bitwarden.com.
+	return c.encryptType(data, AesCbc256_HmacSha256_B64)
+}
+
+func (c *secretCache) encryptType(data []byte, typ CipherStringType) (CipherString, error) {
 	if len(data) == 0 {
-		return s, nil
+		return CipherString{}, nil
 	}
 	if err := c.initKeys(); err != nil {
-		return s, err
+		return CipherString{}, err
 	}
-	s.Type = AesCbc256_HmacSha256_B64
+	return encryptWith(data, typ, c.key, c.macKey)
+}
+
+func encryptWith(data []byte, typ CipherStringType, key, macKey []byte) (CipherString, error) {
+	s := CipherString{}
+	switch typ {
+	case AesCbc256_B64, AesCbc256_HmacSha256_B64:
+	default:
+		return s, fmt.Errorf("encrypt: unsupported cipher type %q", s.Type)
+	}
+	s.Type = typ
 	data = pad(data, aes.BlockSize)
 
-	block, err := aes.NewCipher(c.key)
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return s, err
 	}
@@ -171,12 +226,17 @@ func (c *secretCache) encrypt(data []byte) (CipherString, error) {
 	mode := cipher.NewCBCEncrypter(block, s.IV)
 	mode.CryptBlocks(s.CT, data)
 
-	var macMessage []byte
-	macMessage = append(macMessage, s.IV...)
-	macMessage = append(macMessage, s.CT...)
-	mac := hmac.New(sha256.New, c.macKey)
-	mac.Write(macMessage)
-	s.MAC = mac.Sum(nil)
+	if typ == AesCbc256_HmacSha256_B64 {
+		if len(macKey) == 0 {
+			return s, fmt.Errorf("encrypt: cipher string type expects a MAC")
+		}
+		var macMessage []byte
+		macMessage = append(macMessage, s.IV...)
+		macMessage = append(macMessage, s.CT...)
+		mac := hmac.New(sha256.New, macKey)
+		mac.Write(macMessage)
+		s.MAC = mac.Sum(nil)
+	}
 
 	return s, nil
 }
@@ -186,15 +246,17 @@ func unpad(src []byte, size int) ([]byte, error) {
 	if len(src)%size != 0 {
 		return nil, fmt.Errorf("expected PKCS7 padding for block size %d, but have %d bytes", size, len(src))
 	}
+	if len(src) <= int(n) {
+		return nil, fmt.Errorf("cannot unpad %d bytes out of a total of %d", n, len(src))
+	}
 	src = src[:len(src)-int(n)]
 	return src, nil
 }
 
 func pad(src []byte, size int) []byte {
+	// Note that we always pad, even if rem==0. This is because unpad must
+	// always remove at least one byte to be unambiguous.
 	rem := len(src) % size
-	if rem == 0 {
-		return src
-	}
 	n := size - rem
 	if n > math.MaxUint8 {
 		panic(fmt.Sprintf("cannot pad over %d bytes, but got %d", math.MaxUint8, n))

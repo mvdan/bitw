@@ -5,7 +5,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -184,33 +183,49 @@ var baseData = []byte(`
 }
 `)[1:]
 
-// These values correspond to a dummy test account where some dummy data was
-// stored to obtain cipher strings. Nothing with the account was ever actually
-// secret or protected, because we don't need to log into the account to run the
-// tests (unlike the end-to-end tests).
+// These values initially corresponded to a dummy test account where some dummy
+// data was stored to obtain cipher strings. Nothing with the account was ever
+// actually secret or protected, because we don't need to log into the account
+// to run the tests (unlike the end-to-end tests).
 const (
 	localTestPassword = "PasswordForTestData"
-	localTestProfile  = `
-{
-	"Email": "testdata@mvdan.cc",
-	"Key": "2.i30jRRMW+S48hHH8ASkQyA==|rOCrwgiSkmjRP33d6rSmkc0KQ14AVZji6gL2GhLFt4ZWA0RuleONpMF+Bt8tr0ulLT0qhtpDbyJjs8UVQiL57OBIfB/s85Bw4vRXYJWvYQE=|HCXNwbnNXQYPQ4hz3DmALn21tUGqd9wjnEzJDwSp8YA=",
-	"PrivateKey": "2.VUp/AjLpJpHiuZbZQflzIw==|vBOmZQoRhOxzHFIdZmWNmiuajzsyRV4PE0Bw2eFeSea9jB06obRFPtj3NSWpyKOAArY9PgiTU054RGvVJZEp1mBp+NA7zVSyTYA2yDymmW73yrdeH0Rn0nVUcjkscVJqvpPAq4SBv7Lcb/46YZwAcuDDCCYI+VxDqVGaj33hbd7g7VRSKKhT3U6SvohY2dthwXwb3svQ5xCTaip7PlvJxeF4PLNKCDtYUws6VB0D7Fct0M68lhyF9H3fDY8r8dCJ40r/wUZw7Go+t458D4hLbgvwQomdaUB6HtSUo6Gdygs44hsaR7CKpCkpxWnu4rdqRTw9xrFziPDH4gGKmm3f77qZRDJIYqkXhjRLJIXY03Ceug6AEBYWmfvEDrvI7xhaYzS7gMJIBVbWHtT5/tN9klS3DUaLnyHLfB2+j1vRWANid+O/+K0E0BNCTg9gpZwYd7qcPFvxkKaCYJZ5LUjbzDdunxK8scIqUAobmnoHLsGcxNlDwRRebIm9fabQuUQWFOQGzvZnD2dsbG0zPath8lD/K4S22emrCj+ZBFCTyMQd7E9qOvLdJ2s4NDh2shgPYHgHh34R5LEyVUR8Vot6Pd7DFZGF4D6zW4w5hsfhtcyU4ljs60NdSR7XQO2/AD5R2bg/k8yXV452L96bonFYKbUI4n/68/MGwe+8Q5aNcHHp6Eo0Yg9K79mK/kYlZOfk7m4uotQjg378j8bMXGoNy9grbjypH+MaDKKp7woSxjJI/IWOp9UWrEUWplAOKgcms5j0NVfZQCdYAW4SvQLS2hGKZ05zyaNgY1vNIAQG6uKb3Bt3CVN/Pl8G99s/qcRgl+cwRz4TlBXKkEE6jinBFF07H2BzBcAlOFOzZoUfzkWIhZvTtUgsC7PEe1+SvdtnZ7Gh8mRoZ9XbUV/RHmXE/dRDBGmxteaIsUc+cI17ykB7wl51aLjoPR4Qxvr8giEsEgWwI2SCW/Nn9PYvEhQLiqk/GM9xH9ChUUq5rWVCI3phuP9uTQOSYCihi2Te1HWxbwPMsIH2kBWtrvM8hNbP8bTMw+rfCa/6Dujx8Nq1pTEg9PrXsXw7KhQrNOMSIuDFvWJUUJC06dxYz4F7Rv2AbRLvFlawFm2l7fRp85E/Rssij+iqj++8XZSl2GQFZbWD4sj23JvpSQdvbZ9kamTvuuohYuCg9qfugWx3Wr9BhGT+E9i0cr01EtGaCwslN65kvtUaB3GrOwEOk3/i83ES223Z+TKWrLKbwVChUBtxCgkVBTLRto37obDjJMb2Z+pVla6wPCBObmqpW7k+TGVIGNCt+TFWA7jh2cs4Shid5qMpnWzShZBtgBAvoPZ1t2IbZVYPHL4V/kRvwax3stHziG5CDiYJD7HAP8SqazBE4ZJMoTuVOjh+GuV15SpL+N4+UlvmX+PKPFVqB0jbF1HH9/Wbw8XZxBsNGp+nz15X91zV4+2i5PapTHsDiq2XH68e3bS2esFbCmGoGqM4JrSQP8w9mMpnwj1gQXpmRitL0L3cU6oHGpe4Hpmf7/zckhS0cUaRTk0bTnFF8ILgd/LBGOb7UBu+VpjSOftiJkTWUG/8/jjoF8KfbBblnGWjmLiPR19Eb4+Q2yDtCZlm35sBnmJy0lsv/XZ7geTLtqjyu8s=|2JpLpBL8HPr6aLHVG9+zs0YsL5TEPBo1VM+Ccmzv30g="
-}`
+	localTestEmail    = "testdata@mvdan.cc"
+
+	// A 32-byte key encrypted with AesCbc256_B64.
+	localTestKey0 = "0.tgrxn4Ve2pPL0M+6/B2e/g==|xfq496HVhDHeoJCKWfXBg/6+cE94KfM0AzV3IJUoWlkqoPR2heODBSQnQ8ZACzHE"
+
+	// A 64-byte key encrypted with AesCbc256_HmacSha256_B64.
+	localTestKey2 = "2.i30jRRMW+S48hHH8ASkQyA==|rOCrwgiSkmjRP33d6rSmkc0KQ14AVZji6gL2GhLFt4ZWA0RuleONpMF+Bt8tr0ulLT0qhtpDbyJjs8UVQiL57OBIfB/s85Bw4vRXYJWvYQE=|HCXNwbnNXQYPQ4hz3DmALn21tUGqd9wjnEzJDwSp8YA="
 )
 
 var cipherStringTests = []struct {
-	name  string
-	input string
-	want  string
+	name     string
+	inKey    string
+	inCipher string
+	want     string
 }{
 	{
 		"Empty",
 		"",
 		"",
+		"",
 	},
 	{
-		"AesCbc256_HmacSha256_B64",
+		"AesCbc256_HmacSha256_B64/SameKey",
+		localTestKey2,
 		"2.UOwWp1xffLz5x3nfNakP2A==|3CxjtqZA378Vjt/9CSYT6Q==|YNGr+MlARtB2k27ojyNOgXKCUwVQu/y0ZbXaI7FEcsA=",
+		"some name",
+	},
+	{
+		"AesCbc256_HmacSha256_B64/SpecialPadding",
+		localTestKey2,
+		"2.K20OZwt1w/U9JiIXT++P6w==|QAIl3SyEMFML9/xgUiRqQPIskKKNJiMwVT125+Z0ETw=|6qFHN8QgdWFLmMTB4ZnjB+zKvFm67HRZcA5a5b9o6lY=",
+		"exactly sixteen!",
+	},
+	{
+		"AesCbc256_B64/SameKey",
+		localTestKey0,
+		"0.gAkDPu4VBwz+k/cYWnpSJQ==|3hLXTjkEStWVvSuBWB4AJw==",
 		"some name",
 	},
 }
@@ -221,43 +236,41 @@ var cipherStringTests = []struct {
 // recent/modern cipher string type for all of its encrypted data.
 func TestCipherString(t *testing.T) {
 	t.Parallel()
-	secrets := secretCache{
-		_password: []byte(localTestPassword),
-		data:      &dataFile{KDFIterations: 100000},
-	}
-	err := json.Unmarshal([]byte(localTestProfile), &secrets.data.Sync.Profile)
-	qt.Assert(t, err, qt.IsNil)
-
 	for _, test := range cipherStringTests {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
-			// Note that secretCache is not safe for concurrent use,
-			// for now.
-			// t.Parallel()
+			t.Parallel()
+
+			// Set up secretCache, decoding the key cipher string too.
+			secrets := secretCache{
+				_password: []byte(localTestPassword),
+				data:      &dataFile{KDFIterations: 100000},
+			}
+			secrets.data.Sync.Profile.Email = localTestEmail
+			err := secrets.data.Sync.Profile.Key.UnmarshalText([]byte(test.inKey))
+			qt.Check(t, err, qt.IsNil)
 
 			// Decode the cipher string.
 			var inputCipher CipherString
-			err := inputCipher.UnmarshalText([]byte(test.input))
-			qt.Assert(t, err, qt.IsNil)
+			err = inputCipher.UnmarshalText([]byte(test.inCipher))
+			qt.Check(t, err, qt.IsNil)
 
 			// Decrypt it, and ensure we get the same plaintext.
 			gotPlain, err := secrets.decrypt(inputCipher)
-			qt.Assert(t, err, qt.IsNil)
-			qt.Assert(t, string(gotPlain), qt.Equals, test.want)
+			qt.Check(t, err, qt.IsNil)
+			qt.Check(t, string(gotPlain), qt.Equals, test.want)
 
 			// Encrypt it, and check that we get the same length.
-			// TODO: the length check should probably only happen if
-			// the cipher string type is the same.
-			gotCipher, err := secrets.encrypt(gotPlain)
-			qt.Assert(t, err, qt.IsNil)
-			qt.Assert(t, gotCipher.String(), qt.HasLen, len(test.input))
+			gotCipher, err := secrets.encryptType([]byte(test.want), inputCipher.Type)
+			qt.Check(t, err, qt.IsNil)
+			qt.Check(t, gotCipher.String(), qt.HasLen, len(test.inCipher))
 
 			// Decrypt the cipher string we encrypted, to check that
 			// we still get the same plaintext. This ensures the
 			// full roundtrip works.
 			gotPlain, err = secrets.decrypt(gotCipher)
-			qt.Assert(t, err, qt.IsNil)
-			qt.Assert(t, string(gotPlain), qt.Equals, test.want)
+			qt.Check(t, err, qt.IsNil)
+			qt.Check(t, string(gotPlain), qt.Equals, test.want)
 		})
 	}
 }
