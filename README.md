@@ -44,3 +44,4 @@ Talking to BitWarden:
 Integrating with the OS:
 
 * https://specifications.freedesktop.org/secret-service/
+* https://www.chucknemeth.com/linux/security/keyring/secret-tool
