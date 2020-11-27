@@ -7,9 +7,11 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strings"
 
@@ -115,7 +117,7 @@ func (c *secretCache) decrypt(s CipherString) ([]byte, error) {
 }
 
 func decryptWith(s CipherString, key, macKey []byte) ([]byte, error) {
-	c, err := aes.NewCipher(key)
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
@@ -136,16 +138,73 @@ func decryptWith(s CipherString, key, macKey []byte) ([]byte, error) {
 		}
 	}
 
-	decrypter := cipher.NewCBCDecrypter(c, s.IV)
+	mode := cipher.NewCBCDecrypter(block, s.IV)
 	dst := make([]byte, len(s.CT))
-	decrypter.CryptBlocks(dst, s.CT)
-	dst = unpad(dst)
+	mode.CryptBlocks(dst, s.CT)
+	dst, err = unpad(dst, aes.BlockSize)
+	if err != nil {
+		return nil, err
+	}
 	return dst, nil
 }
 
-func unpad(src []byte) []byte {
+func (c *secretCache) encrypt(data []byte) (CipherString, error) {
+	s := CipherString{}
+	if len(data) == 0 {
+		return s, nil
+	}
+	if err := c.initKeys(); err != nil {
+		return s, err
+	}
+	s.Type = AesCbc256_HmacSha256_B64
+	data = pad(data, aes.BlockSize)
+
+	block, err := aes.NewCipher(c.key)
+	if err != nil {
+		return s, err
+	}
+	s.IV = make([]byte, aes.BlockSize)
+	if _, err := io.ReadFull(rand.Reader, s.IV); err != nil {
+		return s, err
+	}
+	s.CT = make([]byte, len(data))
+	mode := cipher.NewCBCEncrypter(block, s.IV)
+	mode.CryptBlocks(s.CT, data)
+
+	var macMessage []byte
+	macMessage = append(macMessage, s.IV...)
+	macMessage = append(macMessage, s.CT...)
+	mac := hmac.New(sha256.New, c.macKey)
+	mac.Write(macMessage)
+	s.MAC = mac.Sum(nil)
+
+	return s, nil
+}
+
+func unpad(src []byte, size int) ([]byte, error) {
 	n := src[len(src)-1]
-	return src[:len(src)-int(n)]
+	if len(src)%size != 0 {
+		return nil, fmt.Errorf("expected PKCS7 padding for block size %d, but have %d bytes", size, len(src))
+	}
+	src = src[:len(src)-int(n)]
+	return src, nil
+}
+
+func pad(src []byte, size int) []byte {
+	rem := len(src) % size
+	if rem == 0 {
+		return src
+	}
+	n := size - rem
+	if n > math.MaxUint8 {
+		panic(fmt.Sprintf("cannot pad over %d bytes, but got %d", math.MaxUint8, n))
+	}
+	padded := make([]byte, len(src)+n)
+	copy(padded, src)
+	for i := len(src); i < len(padded); i++ {
+		padded[i] = byte(n)
+	}
+	return padded
 }
 
 func validMAC(message, messageMAC, key []byte) bool {

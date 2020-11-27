@@ -53,6 +53,9 @@ func (s CipherString) MarshalText() ([]byte, error) {
 }
 
 func (s CipherString) String() string {
+	if s.IsZero() {
+		return ""
+	}
 	if !s.Type.HasMAC() {
 		return fmt.Sprintf("%d.%s|%s",
 			s.Type,

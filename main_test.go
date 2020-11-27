@@ -235,14 +235,29 @@ func TestCipherString(t *testing.T) {
 			// for now.
 			// t.Parallel()
 
-			var cipher CipherString
-			err := cipher.UnmarshalText([]byte(test.input))
+			// Decode the cipher string.
+			var inputCipher CipherString
+			err := inputCipher.UnmarshalText([]byte(test.input))
 			qt.Assert(t, err, qt.IsNil)
 
-			got, err := secrets.decryptStr(cipher)
+			// Decrypt it, and ensure we get the same plaintext.
+			gotPlain, err := secrets.decrypt(inputCipher)
 			qt.Assert(t, err, qt.IsNil)
+			qt.Assert(t, string(gotPlain), qt.Equals, test.want)
 
-			qt.Assert(t, string(got), qt.Equals, test.want)
+			// Encrypt it, and check that we get the same length.
+			// TODO: the length check should probably only happen if
+			// the cipher string type is the same.
+			gotCipher, err := secrets.encrypt(gotPlain)
+			qt.Assert(t, err, qt.IsNil)
+			qt.Assert(t, gotCipher.String(), qt.HasLen, len(test.input))
+
+			// Decrypt the cipher string we encrypted, to check that
+			// we still get the same plaintext. This ensures the
+			// full roundtrip works.
+			gotPlain, err = secrets.decrypt(gotCipher)
+			qt.Assert(t, err, qt.IsNil)
+			qt.Assert(t, string(gotPlain), qt.Equals, test.want)
 		})
 	}
 }
