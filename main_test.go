@@ -32,7 +32,11 @@ func (m bitwMain) Run() int {
 
 func TestMain(m *testing.M) {
 	os.Exit(testscript.RunMain(bitwMain{m}, map[string]func() int{
-		"bitw": func() int {
+		"bitw": func() int { return main1(os.Stderr) },
+		// bitw-toomany is a helpful command to use in some of the
+		// scripts talking to bitwarden.com. In particular, it reports
+		// "too many requests" via a file.
+		"bitw-toomany": func() int {
 			stderr := new(bytes.Buffer)
 			code := main1(stderr)
 			s := stderr.String()

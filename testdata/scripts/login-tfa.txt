@@ -28,7 +28,7 @@ cmp stderr badprovider.stderr
 2fa $TFAKEY success.stdin
 
 stdin success.stdin
-bitw login
+bitw-toomany login
 [file:toomany] skip 'too many two-factor auth requests, try again later'
 cmp stderr success.stderr
 
@@ -50,7 +50,7 @@ grep '"Email": "testwithtfa@mvdan.cc",' $CONFIG_DIR/data.json
 env PASSWORD=$PASSWORD_WITHTFA
 
 stdin badtoken.stdin
-! bitw login
+! bitw-toomany login
 [file:toomany] skip 'too many two-factor auth requests, try again later'
 stderr 'could not login via two-factor'
 stderr 'Two-step token is invalid'
