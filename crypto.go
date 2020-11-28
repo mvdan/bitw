@@ -7,11 +7,13 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
-	"crypto/rand"
+	cryptorand "crypto/rand"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"math"
+	"math/big"
 	"os"
 	"strings"
 
@@ -80,7 +82,7 @@ func (c *secretCache) initKeys() error {
 	// This bit of code can help create a random key and encrypt it with a
 	// given email/password. Useful for creating test data for TestCipherString.
 	// rnd := make([]byte, 32) // or 64 to include a mac key
-	// if _, err := io.ReadFull(rand.Reader, rnd); err != nil {
+	// if _, err := io.ReadFull(cryptorand.Reader, rnd); err != nil {
 	// 	return err
 	// }
 	// // use "key, macKey := stretchKey(masterKey)" for a Hmac cipher type
@@ -182,7 +184,7 @@ func decryptWith(s CipherString, key, macKey []byte) ([]byte, error) {
 	mode := cipher.NewCBCDecrypter(block, s.IV)
 	dst := make([]byte, len(s.CT))
 	mode.CryptBlocks(dst, s.CT)
-	dst, err = unpad(dst, aes.BlockSize)
+	dst, err = unpadPKCS7(dst, aes.BlockSize)
 	if err != nil {
 		return nil, err
 	}
@@ -212,14 +214,14 @@ func encryptWith(data []byte, typ CipherStringType, key, macKey []byte) (CipherS
 		return s, fmt.Errorf("encrypt: unsupported cipher type %q", s.Type)
 	}
 	s.Type = typ
-	data = pad(data, aes.BlockSize)
+	data = padPKCS7(data, aes.BlockSize)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return s, err
 	}
 	s.IV = make([]byte, aes.BlockSize)
-	if _, err := io.ReadFull(rand.Reader, s.IV); err != nil {
+	if _, err := io.ReadFull(cryptorand.Reader, s.IV); err != nil {
 		return s, err
 	}
 	s.CT = make([]byte, len(data))
@@ -241,7 +243,7 @@ func encryptWith(data []byte, typ CipherStringType, key, macKey []byte) (CipherS
 	return s, nil
 }
 
-func unpad(src []byte, size int) ([]byte, error) {
+func unpadPKCS7(src []byte, size int) ([]byte, error) {
 	n := src[len(src)-1]
 	if len(src)%size != 0 {
 		return nil, fmt.Errorf("expected PKCS7 padding for block size %d, but have %d bytes", size, len(src))
@@ -253,7 +255,7 @@ func unpad(src []byte, size int) ([]byte, error) {
 	return src, nil
 }
 
-func pad(src []byte, size int) []byte {
+func padPKCS7(src []byte, size int) []byte {
 	// Note that we always pad, even if rem==0. This is because unpad must
 	// always remove at least one byte to be unambiguous.
 	rem := len(src) % size
@@ -274,4 +276,91 @@ func validMAC(message, messageMAC, key []byte) bool {
 	mac.Write(message)
 	expectedMAC := mac.Sum(nil)
 	return hmac.Equal(messageMAC, expectedMAC)
+}
+
+type dhGroup struct {
+	g, p, pMinus1 *big.Int
+}
+
+var bigOne = big.NewInt(1)
+
+func (dg *dhGroup) NewKeypair() (private, public *big.Int, err error) {
+	for {
+		if private, err = cryptorand.Int(cryptorand.Reader, dg.pMinus1); err != nil {
+			return nil, nil, err
+		}
+		if private.Sign() > 0 {
+			break
+		}
+	}
+	public = new(big.Int).Exp(dg.g, private, dg.p)
+	return private, public, nil
+}
+
+func (dg *dhGroup) diffieHellman(theirPublic, myPrivate *big.Int) (*big.Int, error) {
+	if theirPublic.Cmp(bigOne) <= 0 || theirPublic.Cmp(dg.pMinus1) >= 0 {
+		return nil, errors.New("DH parameter out of bounds")
+	}
+	return new(big.Int).Exp(theirPublic, myPrivate, dg.p), nil
+}
+
+func rfc2409SecondOakleyGroup() *dhGroup {
+	p, _ := new(big.Int).SetString("FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF", 16)
+	return &dhGroup{
+		g:       new(big.Int).SetInt64(2),
+		p:       p,
+		pMinus1: new(big.Int).Sub(p, bigOne),
+	}
+}
+
+func (dg *dhGroup) keygenHKDFSHA256AES128(theirPublic *big.Int, myPrivate *big.Int) ([]byte, error) {
+	sharedSecret, err := dg.diffieHellman(theirPublic, myPrivate)
+	if err != nil {
+		return nil, err
+	}
+
+	r := hkdf.New(sha256.New, sharedSecret.Bytes(), nil, nil)
+	aesKey := make([]byte, 16)
+	if _, err := io.ReadFull(r, aesKey); err != nil {
+		return nil, err
+	}
+	return aesKey, nil
+}
+
+func unauthenticatedAESCBCEncrypt(data, key []byte) (iv, ciphertext []byte, _ error) {
+	data = padPKCS7(data, aes.BlockSize)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, nil, err
+	}
+	ivSize := aes.BlockSize
+	iv = make([]byte, ivSize)
+	ciphertext = make([]byte, len(data))
+	if _, err := io.ReadFull(cryptorand.Reader, iv); err != nil {
+		return nil, nil, err
+	}
+	mode := cipher.NewCBCEncrypter(block, iv)
+	mode.CryptBlocks(ciphertext, data)
+	return iv, ciphertext, nil
+}
+
+// Unused for now; can be useful in the future, for e.g. storing secrets.
+func unauthenticatedAESCBCDecrypt(iv, ciphertext, key []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	if len(iv) != aes.BlockSize {
+		return nil, fmt.Errorf("iv length does not match AES block size")
+	}
+	if len(ciphertext)%aes.BlockSize != 0 {
+		return nil, fmt.Errorf("ciphertext is not a multiple of AES block size")
+	}
+	mode := cipher.NewCBCDecrypter(block, iv)
+	mode.CryptBlocks(ciphertext, ciphertext) // decrypt in-place
+	data, err := unpadPKCS7(ciphertext, aes.BlockSize)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

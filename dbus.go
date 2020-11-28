@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 	"os"
 	"path"
 
@@ -20,7 +21,10 @@ const (
 )
 
 var (
+	// From 'man sd-bus-errors'.
 	errNotSupported = dbus.NewError("org.freedesktop.DBus.Error.NotSupported", nil)
+	errInvalidArgs  = dbus.NewError("org.freedesktop.DBus.Error.InvalidArgs", nil)
+
 	errNoSuchObject = dbus.NewError("org.freedesktop.Secret.Error.NoSuchObject", nil)
 	errAlreadyTaken = fmt.Errorf("dbus name %s already taken", dbusName)
 )
@@ -75,14 +79,37 @@ func serveDBus(ctx context.Context) error {
 	return ctx.Err()
 }
 
-type dbusService struct{}
+type dbusService struct {
+	aesKey []byte
+}
 
 func (d *dbusService) OpenSession(algo string, input dbus.Variant) (output dbus.Variant, result dbus.ObjectPath, _ *dbus.Error) {
+	// TODO: support multiple sessions at once
+	session := objPath("/session/default")
+
 	switch algo {
 	case "plain":
-		return dbus.MakeVariant(""), objPath("/session/default"), nil
+		return dbus.MakeVariant(""), session, nil
+	case "dh-ietf1024-sha256-aes128-cbc-pkcs7":
+		group := rfc2409SecondOakleyGroup()
+		private, public, err := group.NewKeypair()
+		if err != nil {
+			return output, "/", dbusErrorf("%s", err)
+		}
+		output = dbus.MakeVariant(public.Bytes()) // math/big.Int.Bytes is big endian
+
+		inputBytes, ok := input.Value().([]byte)
+		if !ok {
+			return output, "/", errInvalidArgs
+		}
+		theirPublic := new(big.Int)
+		theirPublic.SetBytes(inputBytes)
+		d.aesKey, err = group.keygenHKDFSHA256AES128(theirPublic, private)
+		if err != nil {
+			return output, "/", dbusErrorf("%s", err)
+		}
+		return output, session, nil
 	default:
-		// TODO: support dh-ietf1024-sha256-aes128-cbc-pkcs7?
 		return output, "/", errNotSupported
 	}
 }
@@ -102,7 +129,7 @@ Ciphers:
 	return
 }
 
-func (d *dbusService) secretByPath(item dbus.ObjectPath) (Cipher, bool) {
+func (d *dbusService) cipherByPath(item dbus.ObjectPath) (Cipher, bool) {
 	id := path.Base(string(item))
 	for _, cipher := range globalData.Sync.Ciphers {
 		if rawUUID(cipher.ID) == id {
@@ -110,6 +137,32 @@ func (d *dbusService) secretByPath(item dbus.ObjectPath) (Cipher, bool) {
 		}
 	}
 	return Cipher{}, false
+}
+
+func (d *dbusService) secretByPath(item, session dbus.ObjectPath) (secret dbusSecret, _ *dbus.Error) {
+	secret.Session = session
+
+	cipher, ok := d.cipherByPath(item)
+	if !ok {
+		return secret, errNoSuchObject
+	}
+
+	password, err := secrets.decrypt(cipher.Login.Password)
+	if err != nil {
+		return secret, dbusErrorf("%s", err)
+	}
+	secret.ContentType = "text/plain"
+	if d.aesKey == nil {
+		secret.Value = password
+		return secret, nil
+	}
+	iv, ciphertext, err := unauthenticatedAESCBCEncrypt(password, d.aesKey)
+	if err != nil {
+		return secret, dbusErrorf("%s", err)
+	}
+	secret.Parameters = iv
+	secret.Value = ciphertext
+	return secret, nil
 }
 
 func rawUUID(id uuid.UUID) string {
@@ -134,15 +187,10 @@ func (d *dbusService) GetAll(msg dbus.Message, iface string) (map[string]dbus.Va
 			// is left out.
 			"xdg:schema": "",
 		})
-		cipher, ok := d.secretByPath(item)
+		cipher, ok := d.cipherByPath(item)
 		if !ok {
 			return nil, errNoSuchObject
 		}
-		name, err := secrets.decryptStr(cipher.Name)
-		if err != nil {
-			return nil, dbusErrorf("%s", err)
-		}
-		props["Label"] = dbus.MakeVariant(name)
 		props["Created"] = dbus.MakeVariant(uint64(cipher.RevisionDate.Unix()))
 		props["Modified"] = dbus.MakeVariant(uint64(cipher.RevisionDate.Unix()))
 	// case "org.freedesktop.Secret.Collection":
@@ -155,37 +203,17 @@ func (d *dbusService) GetAll(msg dbus.Message, iface string) (map[string]dbus.Va
 
 func (d *dbusService) GetSecret(msg dbus.Message, session dbus.ObjectPath) (secret dbusSecret, _ *dbus.Error) {
 	item := msg.Headers[dbus.FieldPath].Value().(dbus.ObjectPath)
-	cipher, ok := d.secretByPath(item)
-	if !ok {
-		return secret, errNoSuchObject
-	}
-	password, err := secrets.decrypt(cipher.Login.Password)
-	if err != nil {
-		return secret, dbusErrorf("%s", err)
-	}
-	return dbusSecret{
-		Session:     session,
-		Value:       password,
-		ContentType: "text/plain",
-	}, nil
+	return d.secretByPath(item, session)
 }
 
 func (d *dbusService) GetSecrets(items []dbus.ObjectPath, session dbus.ObjectPath) (byPath map[dbus.ObjectPath]dbusSecret, _ *dbus.Error) {
 	byPath = make(map[dbus.ObjectPath]dbusSecret)
 	for _, item := range items {
-		cipher, ok := d.secretByPath(item)
-		if !ok {
-			return nil, errNoSuchObject
-		}
-		password, err := secrets.decrypt(cipher.Login.Password)
+		secret, err := d.secretByPath(item, session)
 		if err != nil {
-			return nil, dbusErrorf("%s", err)
+			return nil, err
 		}
-		byPath[item] = dbusSecret{
-			Session:     session,
-			Value:       password,
-			ContentType: "text/plain",
-		}
+		byPath[item] = secret
 	}
 	return
 }

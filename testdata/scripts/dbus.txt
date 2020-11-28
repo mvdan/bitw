@@ -42,6 +42,5 @@ stdout 'password1'
 # Search for secrets.
 
 exec secret-tool search name login1
-stdout 'label = login1'
 stdout 'modified = 2019-'
 stdout 'secret = password1'
