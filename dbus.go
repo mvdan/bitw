@@ -191,6 +191,7 @@ func (d *dbusService) GetAll(msg dbus.Message, iface string) (map[string]dbus.Va
 		if !ok {
 			return nil, errNoSuchObject
 		}
+		props["Label"] = dbus.MakeVariant("")
 		props["Created"] = dbus.MakeVariant(uint64(cipher.RevisionDate.Unix()))
 		props["Modified"] = dbus.MakeVariant(uint64(cipher.RevisionDate.Unix()))
 	// case "org.freedesktop.Secret.Collection":
