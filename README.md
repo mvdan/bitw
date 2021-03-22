@@ -1,6 +1,6 @@
 # bitw
 
-A simple BitWarden client. Requires Go 1.14 or later.
+A simple BitWarden client. Requires Go 1.15 or later.
 
 	cd $(mktemp -d); go mod init tmp; go get mvdan.cc/bitw
 
