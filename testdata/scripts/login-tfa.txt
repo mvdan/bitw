@@ -51,6 +51,9 @@ env PASSWORD=$PASSWORD_WITHTFA
 
 stdin badtoken.stdin
 ! bitw-toomany login
+# TODO: this "file:toomany" check never works,
+# since bitw-toomany succeeds when encountering the error,
+# making the "!" check above fail.
 [file:toomany] skip 'too many two-factor auth requests, try again later'
 stderr 'could not login via two-factor'
 stderr 'Two-step token is invalid'
