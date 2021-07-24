@@ -13,7 +13,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"text/tabwriter"
 	"time"
 
 	"github.com/google/uuid"
@@ -236,14 +235,33 @@ func run(args ...string) (err error) {
 		saveData = true
 	}
 
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	// If stdin is a terminal, ensure we reset its state before exiting.
+	stdinFD := int(os.Stdin.Fd())
+	stdinOldState, _ := term.GetState(stdinFD)
+
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
 		cancel()
+
+		// If we still haven't exited after 200ms,
+		// we're probably stuck reading a password.
+		// Unfortunately, term.ReadPassword can't be cancelled right now.
+		//
+		// The least we can do is restore the terminal to its original state,
+		// and exit the entire program.
+		// TODO: probably revisit this at some point.
+		time.Sleep(200 * time.Millisecond)
+		if stdinOldState != nil { // if nil, stdin is not a terminal
+			_ = term.Restore(stdinFD, stdinOldState)
+		}
+		fmt.Println()
+		os.Exit(0)
 	}()
 
 	ctx = context.WithValue(ctx, authToken{}, globalData.AccessToken)
@@ -260,10 +278,29 @@ func run(args ...string) (err error) {
 			return err
 		}
 	case "dump":
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', tabwriter.AlignRight)
-		fmt.Fprintln(w, "name\turi\tusername\tpassword\t")
-		for _, cipher := range globalData.Sync.Ciphers {
-			for _, cipherStr := range [...]CipherString{
+		// Make sure we have the password before printing anything.
+		if _, err := secrets.password(); err != nil {
+			return err
+		}
+
+		// Split the ciphers into categories, for printing.
+		// Don't use text/tabwriter, as deciphering hundreds can be slow.
+		// TODO: print non-login ciphers too, such as cards.
+		// TODO: use encoding/csv instead.
+		var logins []*Cipher
+		for i := range globalData.Sync.Ciphers {
+			cipher := &globalData.Sync.Ciphers[i]
+			if cipher.Login != nil {
+				logins = append(logins, cipher)
+			}
+		}
+		fmt.Println("# Logins:")
+		fmt.Println("name\turi\tusername\tpassword")
+		for _, cipher := range logins {
+			if ctx.Err() != nil {
+				break // cancelled
+			}
+			for i, cipherStr := range [...]CipherString{
 				cipher.Name,
 				cipher.Login.URI,
 				cipher.Login.Username,
@@ -273,11 +310,13 @@ func run(args ...string) (err error) {
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(w, "%s\t", s)
+				if i > 0 && len(s) > 0 {
+					fmt.Printf("\t")
+				}
+				fmt.Printf("%s", s)
 			}
-			fmt.Fprintln(w)
+			fmt.Println()
 		}
-		w.Flush()
 	case "serve":
 		if err := serveDBus(ctx); err != nil {
 			return err
