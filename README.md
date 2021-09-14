@@ -1,8 +1,8 @@
 # bitw
 
-A simple BitWarden client. Requires Go 1.15 or later.
+A simple BitWarden client. Requires Go 1.16 or later.
 
-	cd $(mktemp -d); go mod init tmp; go get mvdan.cc/bitw
+	go install mvdan.cc/bitw@latest
 
 The goal is a static and portable client which integrates well with one's
 system. For example, on Linux it implements the `org.freedesktop.secrets` D-Bus
