@@ -18,7 +18,6 @@ type SyncData struct {
 	Profile Profile
 	Folders []Folder
 	Ciphers []Cipher
-	Domains Domains
 }
 
 type CipherString struct {
@@ -167,17 +166,6 @@ type Folder struct {
 	ID           uuid.UUID
 	Name         string
 	RevisionDate time.Time
-}
-
-type Domains struct {
-	EquivalentDomains       []string
-	GlobalEquivalentDomains []GlobalEquivalentDomains
-}
-
-type GlobalEquivalentDomains struct {
-	Type     int
-	Domains  []string
-	Excluded bool `json:",omitempty"`
 }
 
 type Cipher struct {
