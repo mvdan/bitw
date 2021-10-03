@@ -25,7 +25,7 @@ cmp stderr badprovider.stderr
 # Now do a correct 2fa login.
 # Note that success.stdin will also select the "0" provider.
 
-2fa $TFAKEY success.stdin
+2fa-wrap $TFAKEY success.stdin
 
 stdin success.stdin
 bitw-toomany login

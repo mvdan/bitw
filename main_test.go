@@ -81,7 +81,7 @@ func TestMain(m *testing.M) {
 			fmt.Printf("timed out waiting for %q\n", os.Args[1:])
 			return 1
 		},
-		"2fa": func() int {
+		"2fa-wrap": func() int {
 			key := os.Args[1]
 			dst := os.Args[2]
 			// TODO: don't require rsc.io/2fa
