@@ -1,6 +1,6 @@
 module mvdan.cc/bitw
 
-go 1.15
+go 1.16
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
