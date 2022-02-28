@@ -24,8 +24,10 @@ import (
 type secretCache struct {
 	data *dataFile
 
-	_password    []byte // cached, to avoid repeated prompts
-	_configEmail string
+	_password      []byte // cached, to avoid repeated prompts
+	_configEmail   string
+	_client_id     []byte
+	_client_secret []byte
 
 	// TODO: store these more securely
 	key    []byte
@@ -58,6 +60,38 @@ func (c *secretCache) password() ([]byte, error) {
 	}
 	c._password = []byte(password)
 	return c._password, nil
+}
+
+func (c *secretCache) client_id() ([]byte, error) {
+	if c._client_id != nil {
+		return c._client_id, nil
+	}
+	if s := os.Getenv("CLIENT_ID"); s != "" {
+		c._client_id = []byte(s)
+		return c._client_id, nil
+	}
+	client_id, err := passwordPrompt("client_id")
+	if err != nil {
+		return nil, err
+	}
+	c._client_id = []byte(client_id)
+	return c._client_id, nil
+}
+
+func (c *secretCache) client_secret() ([]byte, error) {
+	if c._client_secret != nil {
+		return c._client_secret, nil
+	}
+	if s := os.Getenv("CLIENT_SECRET"); s != "" {
+		c._client_secret = []byte(s)
+		return c._client_secret, nil
+	}
+	client_secret, err := passwordPrompt("client_secret")
+	if err != nil {
+		return nil, err
+	}
+	c._client_secret = []byte(client_secret)
+	return c._client_secret, nil
 }
 
 func (c *secretCache) initKeys() error {
