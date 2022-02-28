@@ -110,12 +110,11 @@ func login(ctx context.Context, useApiKey bool) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("client_id: %s\n", string(client_id[:]))
+
 		client_secret, err := secrets.client_secret()
 		if err != nil {
 			return err
 		}
-		fmt.Printf("client_secret: %s\n", string(client_secret[:]))
 
 		values = urlValues(
 			"client_id", string(client_id[:]),
