@@ -60,7 +60,7 @@ func deviceType() string {
 	}
 }
 
-func login(ctx context.Context, useApiKey bool) error {
+func login(ctx context.Context, retryWithApiKey bool) error {
 	email := secrets.email()
 	if email == "" {
 		return fmt.Errorf("need a configured email or $EMAIL to log in")
@@ -77,7 +77,7 @@ func login(ctx context.Context, useApiKey bool) error {
 	saveData = true
 
 	var values url.Values
-	if !useApiKey {
+	if !retryWithApiKey {
 		password, err := secrets.password()
 		if err != nil {
 			return err
@@ -106,19 +106,19 @@ func login(ctx context.Context, useApiKey bool) error {
 			"deviceIdentifier", globalData.DeviceID,
 		)
 	} else {
-		client_id, err := secrets.client_id()
+		clientId, err := secrets.clientId()
 		if err != nil {
 			return err
 		}
 
-		client_secret, err := secrets.client_secret()
+		clientSecret, err := secrets.clientSecret()
 		if err != nil {
 			return err
 		}
 
 		values = urlValues(
-			"client_id", string(client_id[:]),
-			"client_secret", string(client_secret[:]),
+			"client_id", string(clientId[:]),
+			"client_secret", string(clientSecret[:]),
 			"scope", loginApiKeyScope,
 			"grant_type", "client_credentials",
 			"deviceType", deviceType(),
@@ -148,6 +148,9 @@ func login(ctx context.Context, useApiKey bool) error {
 			return fmt.Errorf("could not login via two-factor: %v", err)
 		}
 	} else if err != nil && strings.Contains(err.Error(), "Captcha required.") {
+		fmt.Println("The server presented us with a captcha.")
+		fmt.Println("The best way to prevent future captcha is by login at least one time via api-key.")
+		fmt.Println("You can read on how to obtain the keys at: https://bitwarden.com/help/personal-api-key/")
 		return login(ctx, true)
 	} else if err != nil {
 		return fmt.Errorf("could not login via password: %v", err)
