@@ -267,7 +267,7 @@ func run(args ...string) (err error) {
 	ctx = context.WithValue(ctx, authToken{}, globalData.AccessToken)
 	switch args[0] {
 	case "login":
-		if err := login(ctx); err != nil {
+		if err := login(ctx, false); err != nil {
 			return err
 		}
 	case "sync":
@@ -331,7 +331,7 @@ func run(args ...string) (err error) {
 
 func ensureToken(ctx context.Context) error {
 	if globalData.RefreshToken == "" {
-		if err := login(ctx); err != nil {
+		if err := login(ctx, false); err != nil {
 			return err
 		}
 	} else if time.Now().After(globalData.TokenExpiry) {

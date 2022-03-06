@@ -14,6 +14,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/pbkdf2"
@@ -40,8 +41,9 @@ const (
 	// deviceName should probably be like "Linux", "Android", etc, but this
 	// helps the human user differentiate bitw logins from those made by the
 	// official clients.
-	deviceName = "bitw"
-	loginScope = "api offline_access"
+	deviceName       = "bitw"
+	loginScope       = "api offline_access"
+	loginApiKeyScope = "api"
 )
 
 func deviceType() string {
@@ -58,7 +60,7 @@ func deviceType() string {
 	}
 }
 
-func login(ctx context.Context) error {
+func login(ctx context.Context, retryWithApiKey bool) error {
 	email := secrets.email()
 	if email == "" {
 		return fmt.Errorf("need a configured email or $EMAIL to log in")
@@ -74,36 +76,60 @@ func login(ctx context.Context) error {
 	globalData.KDFIterations = preLogin.KDFIterations
 	saveData = true
 
-	password, err := secrets.password()
-	if err != nil {
-		return err
+	var values url.Values
+	if !retryWithApiKey {
+		password, err := secrets.password()
+		if err != nil {
+			return err
+		}
+
+		// First, we create the master key, with the password, the lowercase
+		// email as salt, and the number of iterations the server told us.
+		masterKey := deriveMasterKey(password, email, preLogin.KDFIterations)
+
+		// Then we create the hashed password, with the master key as password,
+		// the password as hash, and just one iteration.
+		hashedPassword := b64enc.EncodeToString(pbkdf2.Key(masterKey, password,
+			1, 32, sha256.New))
+
+		// Now, we request an auth token.
+		// For some reason, this endpoint requires url-encoded values, and won't
+		// accept JSON. But of course, the response is JSON.
+		values = urlValues(
+			"grant_type", "password",
+			"username", email,
+			"password", string(hashedPassword),
+			"scope", loginScope,
+			"client_id", "connector", // seen in bitwarden/jslib
+			"deviceType", deviceType(),
+			"deviceName", deviceName,
+			"deviceIdentifier", globalData.DeviceID,
+		)
+	} else {
+		clientId, err := secrets.clientId()
+		if err != nil {
+			return err
+		}
+
+		clientSecret, err := secrets.clientSecret()
+		if err != nil {
+			return err
+		}
+
+		values = urlValues(
+			"client_id", string(clientId[:]),
+			"client_secret", string(clientSecret[:]),
+			"scope", loginApiKeyScope,
+			"grant_type", "client_credentials",
+			"deviceType", deviceType(),
+			"deviceName", deviceName,
+			"deviceIdentifier", globalData.DeviceID,
+		)
 	}
 
-	// First, we create the master key, with the password, the lowercase
-	// email as salt, and the number of iterations the server told us.
-	masterKey := deriveMasterKey(password, email, preLogin.KDFIterations)
-
-	// Then we create the hashed password, with the master key as password,
-	// the password as hash, and just one iteration.
-	hashedPassword := b64enc.EncodeToString(pbkdf2.Key(masterKey, password,
-		1, 32, sha256.New))
-
 	now := time.Now().UTC()
-	// Now, we request an auth token.
-	// For some reason, this endpoint requires url-encoded values, and won't
-	// accept JSON. But of course, the response is JSON.
 	var tokLogin tokLoginResponse
-	values := urlValues(
-		"grant_type", "password",
-		"username", email,
-		"password", string(hashedPassword),
-		"scope", loginScope,
-		"client_id", "connector", // seen in bitwarden/jslib
-		"deviceType", deviceType(),
-		"deviceName", deviceName,
-		"deviceIdentifier", globalData.DeviceID,
-	)
-	err = jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values)
+	err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values)
 	errsc, ok := err.(*errStatusCode)
 	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
 		var twoFactor twoFactorResponse
@@ -121,6 +147,11 @@ func login(ctx context.Context) error {
 		if err := jsonPOST(ctx, idtURL+"/connect/token", &tokLogin, values); err != nil {
 			return fmt.Errorf("could not login via two-factor: %v", err)
 		}
+	} else if err != nil && strings.Contains(err.Error(), "Captcha required.") {
+		fmt.Println("The server presented us with a captcha.")
+		fmt.Println("The best way to prevent future captcha is by login at least one time via api-key.")
+		fmt.Println("You can read on how to obtain the keys at: https://bitwarden.com/help/personal-api-key/")
+		return login(ctx, true)
 	} else if err != nil {
 		return fmt.Errorf("could not login via password: %v", err)
 	}
