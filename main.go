@@ -134,7 +134,7 @@ type dataFile struct {
 	AccessToken    string
 	RefreshToken   string
 	TokenExpiry    time.Time
-	KDF            int
+	KDF            KDFType
 	KDFIterations  int
 	KDFMemory      int
 	KDFParallelism int

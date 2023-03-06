@@ -22,9 +22,11 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
+type KDFType int
+
 const (
-	KDFTypePBKDF2   = 0
-	KDFTypeArgon2id = 1
+	KDFTypePBKDF2   KDFType = 0
+	KDFTypeArgon2id KDFType = 1
 )
 
 type secretCache struct {
@@ -166,7 +168,7 @@ func (c *secretCache) initKeys() error {
 	return nil
 }
 
-func deriveMasterKey(password []byte, email string, kdfType int, iter int, mem int, par int) ([]byte, error) {
+func deriveMasterKey(password []byte, email string, kdfType KDFType, iter int, mem int, par int) ([]byte, error) {
 	switch kdfType {
 	case KDFTypePBKDF2:
 		return pbkdf2.Key(password, []byte(strings.ToLower(email)), iter, 32, sha256.New), nil
