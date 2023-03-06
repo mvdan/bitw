@@ -174,7 +174,8 @@ const (
 	U2f                   TwoFactorProvider = 4
 	Remember              TwoFactorProvider = 5
 	OrganizationDuo       TwoFactorProvider = 6
-	_TwoFactorProviderMax                   = 7
+	WebAuthn              TwoFactorProvider = 7
+	_TwoFactorProviderMax                   = 8
 )
 
 func (t *TwoFactorProvider) UnmarshalText(text []byte) error {
