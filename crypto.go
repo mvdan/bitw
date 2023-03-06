@@ -7,8 +7,13 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
+	"crypto/rand"
 	cryptorand "crypto/rand"
+	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -40,6 +45,11 @@ type secretCache struct {
 	// TODO: store these more securely
 	key    []byte
 	macKey []byte
+
+	// should we also store this as bytes and then decode on every use?
+	privateKey *rsa.PrivateKey
+	orgKeys    map[string][]byte
+	orgMacKeys map[string][]byte
 }
 
 func (c *secretCache) email() string {
@@ -167,6 +177,38 @@ func (c *secretCache) initKeys() error {
 		c.key, c.macKey = finalKey[:32], finalKey[32:64]
 	default:
 		return fmt.Errorf("invalid key length: %d", len(finalKey))
+	}
+
+	pkcs8PrivateKey, err := secrets.decrypt(c.data.Sync.Profile.PrivateKey)
+	if err != nil {
+		return err
+	}
+	key, err := x509.ParsePKCS8PrivateKey(pkcs8PrivateKey)
+	if err != nil {
+		return err
+	}
+	c.privateKey = key.(*rsa.PrivateKey)
+	c.orgKeys = make(map[string][]byte)
+	c.orgMacKeys = make(map[string][]byte)
+
+	for _, organization := range c.data.Sync.Profile.Organizations {
+		fmt.Println(organization)
+
+		var keyString = organization.Key[2:]
+
+		//base64 decode key
+		decodedData, err := base64.StdEncoding.DecodeString(keyString)
+
+		if err != nil {
+			return err
+		}
+		res, err := rsa.DecryptOAEP(sha1.New(), rand.Reader, c.privateKey, decodedData, nil)
+
+		if err != nil {
+			return err
+		}
+		c.orgKeys[organization.Id.String()] = res[0:32]
+		c.orgMacKeys[organization.Id.String()] = res[32:64]
 	}
 
 	return nil
