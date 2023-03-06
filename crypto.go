@@ -95,6 +95,10 @@ func (c *secretCache) clientSecret() ([]byte, error) {
 }
 
 func (c *secretCache) initKeys() error {
+	if c.key != nil {
+		return nil
+	}
+
 	keyCipher := c.data.Sync.Profile.Key
 	switch keyCipher.Type {
 	case AesCbc256_B64, AesCbc256_HmacSha256_B64:
