@@ -89,7 +89,10 @@ func login(ctx context.Context, retryWithApiKey bool) error {
 
 		// First, we create the master key, with the password, the lowercase
 		// email as salt, and the number of iterations the server told us.
-		masterKey := deriveMasterKey(password, email, preLogin.KDF, preLogin.KDFIterations, preLogin.KDFMemory, preLogin.KDFParallelism)
+		masterKey, err := deriveMasterKey(password, email, preLogin.KDF, preLogin.KDFIterations, preLogin.KDFMemory, preLogin.KDFParallelism)
+		if err != nil {
+			return err
+		}
 
 		// Then we create the hashed password, with the master key as password,
 		// the password as hash, and just one iteration.
