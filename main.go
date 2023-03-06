@@ -306,6 +306,11 @@ func run(args ...string) (err error) {
 				cipher.Login.Username,
 				cipher.Login.Password,
 			} {
+				// Organization ciphers are not supported for now
+				if cipher.OrganizationID != nil {
+					continue
+				}
+
 				s, err := secrets.decrypt(cipherStr)
 				if err != nil {
 					return err
