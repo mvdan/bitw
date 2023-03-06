@@ -17,8 +17,14 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/hkdf"
 	"golang.org/x/crypto/pbkdf2"
+)
+
+const (
+	KDFTypePBKDF2   = 0
+	KDFTypeArgon2id = 1
 )
 
 type secretCache struct {
@@ -111,7 +117,7 @@ func (c *secretCache) initKeys() error {
 		return err
 	}
 
-	masterKey := deriveMasterKey(password, email, c.data.KDFIterations)
+	masterKey := deriveMasterKey(password, email, c.data.KDF, c.data.KDFIterations, c.data.KDFMemory, c.data.KDFParallelism)
 
 	// This bit of code can help create a random key and encrypt it with a
 	// given email/password. Useful for creating test data for TestCipherString.
@@ -157,8 +163,16 @@ func (c *secretCache) initKeys() error {
 	return nil
 }
 
-func deriveMasterKey(password []byte, email string, iter int) []byte {
-	return pbkdf2.Key(password, []byte(strings.ToLower(email)), iter, 32, sha256.New)
+func deriveMasterKey(password []byte, email string, kdfType int, iter int, mem int, par int) []byte {
+	switch kdfType {
+	case KDFTypePBKDF2:
+		return pbkdf2.Key(password, []byte(strings.ToLower(email)), iter, 32, sha256.New)
+	case KDFTypeArgon2id:
+		var salt [32]byte = sha256.Sum256([]byte(strings.ToLower(email)))
+		return argon2.IDKey(password, salt[:], uint32(iter), uint32(mem*1024), uint8(par), 32)
+	default:
+		return pbkdf2.Key(password, []byte(strings.ToLower(email)), iter, 32, sha256.New)
+	}
 }
 
 func stretchKey(orig []byte) (key, macKey []byte) {
