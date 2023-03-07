@@ -192,21 +192,20 @@ func (c *secretCache) initKeys() error {
 	c.orgMacKeys = make(map[string][]byte)
 
 	for _, organization := range c.data.Sync.Profile.Organizations {
-		fmt.Println(organization)
-
+		// the first byte is the encryption type (always 4 at the moment)
+		// the second byte is a separator
 		var keyString = organization.Key[2:]
 
-		//base64 decode key
 		decodedData, err := base64.StdEncoding.DecodeString(keyString)
-
 		if err != nil {
 			return err
 		}
+
 		res, err := rsa.DecryptOAEP(sha1.New(), rand.Reader, c.privateKey, decodedData, nil)
-
 		if err != nil {
 			return err
 		}
+
 		c.orgKeys[organization.Id.String()] = res[0:32]
 		c.orgMacKeys[organization.Id.String()] = res[32:64]
 	}
