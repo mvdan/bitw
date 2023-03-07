@@ -25,8 +25,10 @@ type preLoginRequest struct {
 }
 
 type preLoginResponse struct {
-	KDF           int
-	KDFIterations int
+	KDF            int
+	KDFIterations  int
+	KDFMemory      int
+	KDFParallelism int
 }
 
 type tokLoginResponse struct {
@@ -72,8 +74,10 @@ func login(ctx context.Context, retryWithApiKey bool) error {
 	}); err != nil {
 		return fmt.Errorf("could not pre-login: %v", err)
 	}
-	globalData.KDF = preLogin.KDF
+	globalData.KDF = KDFType(preLogin.KDF)
 	globalData.KDFIterations = preLogin.KDFIterations
+	globalData.KDFMemory = preLogin.KDFMemory
+	globalData.KDFParallelism = preLogin.KDFParallelism
 	saveData = true
 
 	var values url.Values
@@ -85,7 +89,10 @@ func login(ctx context.Context, retryWithApiKey bool) error {
 
 		// First, we create the master key, with the password, the lowercase
 		// email as salt, and the number of iterations the server told us.
-		masterKey := deriveMasterKey(password, email, preLogin.KDFIterations)
+		masterKey, err := deriveMasterKey(password, email, KDFType(preLogin.KDF), preLogin.KDFIterations, preLogin.KDFMemory, preLogin.KDFParallelism)
+		if err != nil {
+			return err
+		}
 
 		// Then we create the hashed password, with the master key as password,
 		// the password as hash, and just one iteration.

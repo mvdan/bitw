@@ -130,12 +130,14 @@ func init() { secrets.data = &globalData }
 type dataFile struct {
 	path string
 
-	DeviceID      string
-	AccessToken   string
-	RefreshToken  string
-	TokenExpiry   time.Time
-	KDF           int
-	KDFIterations int
+	DeviceID       string
+	AccessToken    string
+	RefreshToken   string
+	TokenExpiry    time.Time
+	KDF            KDFType
+	KDFIterations  int
+	KDFMemory      int
+	KDFParallelism int
 
 	LastSync time.Time
 	Sync     SyncData
