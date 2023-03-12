@@ -1,6 +1,6 @@
 # bitw
 
-A simple BitWarden client. Requires Go 1.18 or later.
+A simple BitWarden client. Requires Go 1.19 or later.
 
 	go install mvdan.cc/bitw@latest
 
