@@ -48,6 +48,7 @@ type secretCache struct {
 	macKey []byte
 
 	// should we also store this as bytes and then decode on every use?
+	// TODO: also store these more securely, like above
 	privateKey *rsa.PrivateKey
 	orgKeys    map[string][]byte
 	orgMacKeys map[string][]byte
