@@ -17,9 +17,7 @@ cmp stdout stdout.golden
 -- stdout.golden --
 # Logins:
 name	uri	username	password
+Organization Test Credential	Test	1234
 login1	domain1.com	username1	password1
 justpassword	singlepassword
 allfields	url1	username	password
-john's card
-John's Identity
-Some secure note
