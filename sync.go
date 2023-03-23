@@ -241,9 +241,9 @@ func (c *Cipher) Match(attr, value string) bool {
 	case "id":
 		got = c.ID.String()
 	case "name":
-		got, err = secrets.decryptStr(c.Name)
+		got, err = secrets.decryptStr(c.Name, c.OrganizationID)
 	case "username":
-		got, err = secrets.decryptStr(c.Login.Username)
+		got, err = secrets.decryptStr(c.Login.Username, c.OrganizationID)
 	default:
 		return false
 	}

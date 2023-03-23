@@ -150,12 +150,7 @@ func (d *dbusService) secretByPath(item, session dbus.ObjectPath) (secret dbusSe
 	var password []byte
 	var err error
 
-	if cipher.OrganizationID == nil {
-		password, err = secrets.decrypt(cipher.Login.Password)
-	} else {
-		password, err = decryptWith(cipher.Login.Password, secrets.orgKeys[cipher.OrganizationID.String()], secrets.orgMacKeys[cipher.OrganizationID.String()])
-	}
-
+	password, err = secrets.decrypt(cipher.Login.Password, cipher.OrganizationID)
 	if err != nil {
 		return secret, dbusErrorf("%s", err)
 	}

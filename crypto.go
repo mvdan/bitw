@@ -22,6 +22,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/hkdf"
 	"golang.org/x/crypto/pbkdf2"
@@ -179,35 +180,37 @@ func (c *secretCache) initKeys() error {
 		return fmt.Errorf("invalid key length: %d", len(finalKey))
 	}
 
-	pkcs8PrivateKey, err := secrets.decrypt(c.data.Sync.Profile.PrivateKey)
-	if err != nil {
-		return err
-	}
-	key, err := x509.ParsePKCS8PrivateKey(pkcs8PrivateKey)
-	if err != nil {
-		return err
-	}
-	c.privateKey = key.(*rsa.PrivateKey)
-	c.orgKeys = make(map[string][]byte)
-	c.orgMacKeys = make(map[string][]byte)
-
-	for _, organization := range c.data.Sync.Profile.Organizations {
-		// the first byte is the encryption type (always 4 at the moment)
-		// the second byte is a separator
-		var keyString = organization.Key[2:]
-
-		decodedData, err := base64.StdEncoding.DecodeString(keyString)
+	if !c.data.Sync.Profile.PrivateKey.IsZero() {
+		pkcs8PrivateKey, err := secrets.decrypt(c.data.Sync.Profile.PrivateKey, nil)
 		if err != nil {
 			return err
 		}
-
-		res, err := rsa.DecryptOAEP(sha1.New(), rand.Reader, c.privateKey, decodedData, nil)
+		key, err := x509.ParsePKCS8PrivateKey(pkcs8PrivateKey)
 		if err != nil {
 			return err
 		}
+		c.privateKey = key.(*rsa.PrivateKey)
+		c.orgKeys = make(map[string][]byte)
+		c.orgMacKeys = make(map[string][]byte)
 
-		c.orgKeys[organization.Id.String()] = res[0:32]
-		c.orgMacKeys[organization.Id.String()] = res[32:64]
+		for _, organization := range c.data.Sync.Profile.Organizations {
+			// the first byte is the encryption type (always 4 at the moment)
+			// the second byte is a separator
+			var keyString = organization.Key[2:]
+
+			decodedData, err := base64.StdEncoding.DecodeString(keyString)
+			if err != nil {
+				return err
+			}
+
+			res, err := rsa.DecryptOAEP(sha1.New(), rand.Reader, c.privateKey, decodedData, nil)
+			if err != nil {
+				return err
+			}
+
+			c.orgKeys[organization.Id.String()] = res[0:32]
+			c.orgMacKeys[organization.Id.String()] = res[32:64]
+		}
 	}
 
 	return nil
@@ -236,22 +239,26 @@ func stretchKey(orig []byte) (key, macKey []byte) {
 	return key, macKey
 }
 
-func (c *secretCache) decryptStr(s CipherString) (string, error) {
-	dec, err := c.decrypt(s)
+func (c *secretCache) decryptStr(s CipherString, orgID *uuid.UUID) (string, error) {
+	dec, err := c.decrypt(s, orgID)
 	if err != nil {
 		return "", err
 	}
 	return string(dec), nil
 }
 
-func (c *secretCache) decrypt(s CipherString) ([]byte, error) {
+func (c *secretCache) decrypt(s CipherString, orgID *uuid.UUID) ([]byte, error) {
 	if s.IsZero() {
 		return nil, nil
 	}
 	if err := c.initKeys(); err != nil {
 		return nil, err
 	}
-	return decryptWith(s, c.key, c.macKey)
+	if orgID != nil {
+		return decryptWith(s, c.orgKeys[orgID.String()], c.orgMacKeys[orgID.String()])
+	} else {
+		return decryptWith(s, c.key, c.macKey)
+	}
 }
 
 func decryptWith(s CipherString, key, macKey []byte) ([]byte, error) {

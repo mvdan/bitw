@@ -315,11 +315,7 @@ func run(args ...string) (err error) {
 				var s []byte
 				var err error
 
-				if cipher.OrganizationID != nil {
-					s, err = decryptWith(cipherStr, secrets.orgKeys[cipher.OrganizationID.String()], secrets.orgMacKeys[cipher.OrganizationID.String()])
-				} else {
-					s, err = secrets.decrypt(cipherStr)
-				}
+				s, err = secrets.decrypt(cipherStr, cipher.OrganizationID)
 
 				if err != nil {
 					return err
