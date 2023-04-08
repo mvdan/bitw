@@ -147,7 +147,10 @@ func (d *dbusService) secretByPath(item, session dbus.ObjectPath) (secret dbusSe
 		return secret, errNoSuchObject
 	}
 
-	password, err := secrets.decrypt(cipher.Login.Password)
+	var password []byte
+	var err error
+
+	password, err = secrets.decrypt(cipher.Login.Password, cipher.OrganizationID)
 	if err != nil {
 		return secret, dbusErrorf("%s", err)
 	}

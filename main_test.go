@@ -258,7 +258,7 @@ func TestCipherString(t *testing.T) {
 			qt.Check(t, err, qt.IsNil)
 
 			// Decrypt it, and ensure we get the same plaintext.
-			gotPlain, err := secrets.decrypt(inputCipher)
+			gotPlain, err := secrets.decrypt(inputCipher, nil)
 			qt.Check(t, err, qt.IsNil)
 			qt.Check(t, string(gotPlain), qt.Equals, test.want)
 
@@ -270,7 +270,7 @@ func TestCipherString(t *testing.T) {
 			// Decrypt the cipher string we encrypted, to check that
 			// we still get the same plaintext. This ensures the
 			// full roundtrip works.
-			gotPlain, err = secrets.decrypt(gotCipher)
+			gotPlain, err = secrets.decrypt(gotCipher, nil)
 			qt.Check(t, err, qt.IsNil)
 			qt.Check(t, string(gotPlain), qt.Equals, test.want)
 		})

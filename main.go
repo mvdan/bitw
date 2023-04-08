@@ -308,7 +308,15 @@ func run(args ...string) (err error) {
 				cipher.Login.Username,
 				cipher.Login.Password,
 			} {
-				s, err := secrets.decrypt(cipherStr)
+				if cipherStr.IsZero() {
+					continue
+				}
+
+				var s []byte
+				var err error
+
+				s, err = secrets.decrypt(cipherStr, cipher.OrganizationID)
+
 				if err != nil {
 					return err
 				}
